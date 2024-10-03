@@ -11,6 +11,5 @@ public class BishopMovesCalculator extends PieceMovesCalculator {
                 {1, -1}
         };
     }
-
 }
 

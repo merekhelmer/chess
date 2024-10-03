@@ -10,9 +10,7 @@ import java.util.Collection;
 
 public abstract class PieceMovesCalculator {
 
-    //each piece provides own set of directions
     protected abstract int[][] getDirections();
-
     //subclasses customize how far a piece can move
     protected int maxDistance() {
         return 7;  //default: entire board
@@ -59,5 +57,3 @@ public abstract class PieceMovesCalculator {
         return validMoves;
     }
 }
-
-
