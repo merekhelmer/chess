@@ -14,11 +14,13 @@ import java.util.Objects;
 public class ChessPiece {
     private final PieceType type;
     private final ChessGame.TeamColor teamColor;
+    private boolean hasMoved;
 
     // Constructor with only two parameters (teamColor and type)
     public ChessPiece(ChessGame.TeamColor teamColor, PieceType type) {
         this.teamColor = teamColor;
         this.type = type;
+        this.hasMoved = false;
     }
 
     @Override
@@ -66,6 +68,14 @@ public class ChessPiece {
      */
     public PieceType getPieceType() {
         return this.type;
+    }
+
+    public boolean hasMoved(){
+        return hasMoved;
+    }
+
+    public void setHasMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
     }
 
     /**
