@@ -88,13 +88,21 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        ChessPiece pieceToMove = board.getPiece(move.getStartPosition());
+
+        // Check for the correct team
+        if (pieceToMove == null || pieceToMove.getTeamColor() != teamTurn) {
+            throw new InvalidMoveException("It's not the turn of the player attempting to make this move.");
+        }
+
         Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
 
         if (validMoves == null || !validMoves.contains(move)) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("The move is invalid.");
         }
 
-        board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+        // make the move on the board
+        board.addPiece(move.getEndPosition(), pieceToMove);
         board.addPiece(move.getStartPosition(), null);
 
         // promotion if necessary
@@ -103,7 +111,7 @@ public class ChessGame {
             board.addPiece(move.getEndPosition(), promotedPiece);
         }
 
-        // Change the turn
+        // change the turn
         teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
@@ -225,6 +233,6 @@ public class ChessGame {
                 }
             }
         }
-        throw new IllegalStateException("King not found");
+        return null;
     }
 }
