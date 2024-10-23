@@ -5,11 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MemoryUserDAO implements UserDAO {
-    private final Map<String, UserData> users;
-
-    public MemoryUserDAO() {
-        users = new HashMap<>();
-    }
+    private final Map<String, UserData> users = new HashMap<>();
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
@@ -20,10 +16,7 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public UserData getUser(String username) throws DataAccessException {
-        if (!users.containsKey(username)) {
-            throw new DataAccessException("User not found.");
-        }
+    public UserData getUser(String username) {
         return users.get(username);
     }
 

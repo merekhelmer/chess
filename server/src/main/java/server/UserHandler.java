@@ -9,6 +9,8 @@ import service.UserService;
 import spark.Request;
 import spark.Response;
 
+import java.util.Map;
+
 public class UserHandler {
 
     private final UserService userService;
@@ -19,20 +21,17 @@ public class UserHandler {
         this.gson = new Gson();
     }
 
-    // Register User (POST /user)
+    // Register (POST /user)
     public Object register(Request req, Response resp) {
-        // Deserialize the request body into a UserData object
         UserData userData = gson.fromJson(req.body(), UserData.class);
 
-        // Validate the required fields
         if (userData.username() == null || userData.password() == null) {
             return handleError(resp, 400, "Error: No username and/or password given");
         }
 
         try {
-            // Attempt to register the user via the UserService
             AuthData authData = userService.register(userData);
-            resp.status(200);  // OK
+            resp.status(200);
             return gson.toJson(authData);
 
         } catch (DataAccessException e) {
@@ -43,20 +42,13 @@ public class UserHandler {
         }
     }
 
-    // Login User (POST /session)
+    // Login (POST /session)
     public Object login(Request req, Response resp) {
-        // Deserialize the request body into a UserData object
         UserData loginData = gson.fromJson(req.body(), UserData.class);
 
-        // Validate the required fields
-        if (loginData.username() == null || loginData.password() == null) {
-            return handleError(resp, 400, "Error: No username and/or password given");
-        }
-
         try {
-            // Attempt to log in the user via the UserService
             AuthData authData = userService.login(loginData);
-            resp.status(200);  // OK
+            resp.status(200);
             return gson.toJson(authData);
 
         } catch (DataAccessException e) {
@@ -67,7 +59,8 @@ public class UserHandler {
         }
     }
 
-    // Logout User (DELETE /session)
+    // Logout (DELETE /session)
+    // Logout (DELETE /session)
     public Object logout(Request req, Response resp) {
         // Extract the authorization token from the request headers
         String authToken = req.headers("authorization");
@@ -80,12 +73,19 @@ public class UserHandler {
             // Invalidate the auth token via the UserService
             userService.logout(authToken);
             resp.status(200);  // OK
-            return gson.toJson("{ \"message\": \"Successfully logged out\" }");
+
+            return gson.toJson(Map.of("message", "Successfully logged out"));
 
         } catch (DataAccessException e) {
+            if (e.getMessage().contains("Invalid auth token")) {
+                // If the auth token is invalid, return 401 Unauthorized
+                return handleError(resp, 401, "Error: Unauthorized - invalid token");
+            }
+            // For other errors, return 500 Internal Server Error
             return handleError(resp, 500, "Error: Internal server error");
         }
     }
+
 
     // Helper method for handling errors
     private Object handleError(Response resp, int statusCode, String message) {

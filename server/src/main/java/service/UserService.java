@@ -16,7 +16,8 @@ public class UserService {
 
     // Registration
     public AuthData register(UserData user) throws DataAccessException {
-        if (userDAO.getUser(user.username()) != null) {
+        UserData existingUser = userDAO.getUser(user.username());
+        if (existingUser != null) {
             throw new DataAccessException("User already exists");
         }
         //create user
@@ -29,7 +30,10 @@ public class UserService {
     // Login
     public AuthData login(UserData user) throws DataAccessException {
         UserData existingUser = userDAO.getUser(user.username());
-        if (existingUser != null && existingUser.password().equals(user.password())) {
+        if (existingUser == null) {
+            throw new DataAccessException("User does not exist");
+        }
+        if (existingUser.password().equals(user.password())) {
             AuthData auth = new AuthData(generateAuthToken(), user.username());
             authDAO.createAuth(auth);
             return auth;
@@ -41,12 +45,12 @@ public class UserService {
     // Logout
     public void logout(String authToken) throws DataAccessException {
         AuthData authData = authDAO.getAuth(authToken);
-        if (authData != null) {
-            authDAO.deleteAuth(authToken);
-        } else {
+        if (authData == null) {
             throw new DataAccessException("Invalid auth token.");
         }
+        authDAO.deleteAuth(authToken);
     }
+
 
     public void clear() {
         userDAO.clear();
