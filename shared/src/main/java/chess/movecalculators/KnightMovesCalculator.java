@@ -1,4 +1,4 @@
-package chess.MoveCalculators;
+package chess.movecalculators;
 
 public class KnightMovesCalculator extends PieceMovesCalculator {
 

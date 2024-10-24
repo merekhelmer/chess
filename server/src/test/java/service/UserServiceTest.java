@@ -6,7 +6,9 @@ import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.*;
+
 import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserServiceTest {
@@ -33,11 +35,6 @@ public class UserServiceTest {
             @Override
             public void createUser(UserData user) {
                 userDataMap.put(user.username(), user);
-            }
-
-            @Override
-            public boolean checkUser(String username, String password) throws DataAccessException {
-                return false;
             }
 
             @Override
@@ -87,7 +84,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testRegisterNegative() throws DataAccessException {
+    public void testRegisterNegative() {
         UserData existingUser = new UserData("user1", "password1", "user1@example.com");
         userDataMap.put(existingUser.username(), existingUser);
 
