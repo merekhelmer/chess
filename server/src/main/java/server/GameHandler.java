@@ -1,14 +1,15 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
+import model.ErrorResult;
 import model.GameData;
-import service.*;
-import service.requests.*;
-import service.results.*;
+import service.GameService;
+import service.requests.CreateGameRequest;
+import service.requests.JoinGameRequest;
+import service.results.CreateGameResult;
 import spark.Request;
 import spark.Response;
-import model.ErrorResult;
-import dataaccess.DataAccessException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,7 +73,6 @@ public class GameHandler {
         }
     }
 
-
     //  (GET /game)
     public Object listGames(Request req, Response resp) {
         String authToken = req.headers("authorization");
@@ -97,7 +97,6 @@ public class GameHandler {
         }
     }
 
-    // Helper method
     private Object handleError(Response resp, int statusCode, String message) {
         resp.status(statusCode);
         return gson.toJson(new ErrorResult(message));

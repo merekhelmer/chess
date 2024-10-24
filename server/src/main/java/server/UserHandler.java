@@ -21,7 +21,7 @@ public class UserHandler {
         this.gson = new Gson();
     }
 
-    // Register (POST /user)
+    // (POST /user)
     public Object register(Request req, Response resp) {
         UserData userData = gson.fromJson(req.body(), UserData.class);
 
@@ -42,7 +42,7 @@ public class UserHandler {
         }
     }
 
-    // Login (POST /session)
+    // (POST /session)
     public Object login(Request req, Response resp) {
         UserData loginData = gson.fromJson(req.body(), UserData.class);
 
@@ -51,25 +51,21 @@ public class UserHandler {
         }
 
         try {
-            // Attempt to log in the user
+            // login attempt
             AuthData authData = userService.login(loginData);
             resp.status(200);  // OK
             return gson.toJson(authData);
 
         } catch (DataAccessException e) {
-            // Handle incorrect username or password
             if (e.getMessage().contains("Invalid username") || e.getMessage().contains("Incorrect password")) {
                 return handleError(resp, 401, "Error: Unauthorized - Invalid username or password");
             }
-            // For any other errors, return 500 Internal Server Error
             return handleError(resp, 500, "Error: Internal server error");
         }
     }
 
-
-    // Logout (DELETE /session)
+    // (DELETE /session)
     public Object logout(Request req, Response resp) {
-        // Extract the authorization token from the request headers
         String authToken = req.headers("authorization");
 
         if (authToken == null || authToken.isEmpty()) {
@@ -77,24 +73,19 @@ public class UserHandler {
         }
 
         try {
-            // Invalidate the auth token via the UserService
             userService.logout(authToken);
-            resp.status(200);  // OK
+            resp.status(200);
 
             return gson.toJson(Map.of("message", "Successfully logged out"));
 
         } catch (DataAccessException e) {
             if (e.getMessage().contains("Invalid auth token")) {
-                // If the auth token is invalid, return 401 Unauthorized
                 return handleError(resp, 401, "Error: Unauthorized - invalid token");
             }
-            // For other errors, return 500 Internal Server Error
             return handleError(resp, 500, "Error: Internal server error");
         }
     }
 
-
-    // Helper method for handling errors
     private Object handleError(Response resp, int statusCode, String message) {
         resp.status(statusCode);
         return gson.toJson(new ErrorResult(message));

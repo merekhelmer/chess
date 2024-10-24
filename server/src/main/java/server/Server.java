@@ -9,20 +9,16 @@ import spark.Spark;
 
 public class Server {
 
-    private UserDAO userDAO;
-    private AuthDAO authDAO;
-    private GameDAO gameDAO;
+    private final UserService userService;
+    private final GameService gameService;
 
-    private UserService userService;
-    private GameService gameService;
-
-    private UserHandler userHandler;
-    private GameHandler gameHandler;
+    private final UserHandler userHandler;
+    private final GameHandler gameHandler;
 
     public Server() {
-        this.userDAO = new MemoryUserDAO();
-        this.authDAO = new MemoryAuthDAO();
-        this.gameDAO = new MemoryGameDAO();
+        MemoryUserDAO userDAO = new MemoryUserDAO();
+        AuthDAO authDAO = new MemoryAuthDAO();
+        GameDAO gameDAO = new MemoryGameDAO();
 
         this.userService = new UserService(userDAO, authDAO);
         this.gameService = new GameService(gameDAO, authDAO);
@@ -34,7 +30,7 @@ public class Server {
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
-        // Serve static files from the /web directory
+        // serve static files from the /web directory
         Spark.staticFiles.location("/web");
 
         Spark.delete("/db", this::clearDB);
@@ -46,7 +42,7 @@ public class Server {
         Spark.post("/game", gameHandler::createGame);
         Spark.put("/game", gameHandler::joinGame);
 
-        // Global exception handling
+        // global exception handling
         Spark.exception(Exception.class, this::genericExceptionHandler);
 
         Spark.awaitInitialization();
@@ -58,7 +54,6 @@ public class Server {
         Spark.awaitStop();
     }
 
-    // Clear the database (for testing purposes)
     private Object clearDB(Request req, Response resp) {
         userService.clear();
         gameService.clear();

@@ -70,7 +70,7 @@ public class ChessPiece {
         return this.type;
     }
 
-    public boolean hasMoved(){
+    public boolean hasMoved() {
         return hasMoved;
     }
 

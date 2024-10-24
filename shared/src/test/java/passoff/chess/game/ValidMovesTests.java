@@ -15,15 +15,15 @@ public class ValidMovesTests {
 
         var game = new ChessGame();
         game.setBoard(loadBoard("""
-                    | | | | | | | | |
-                    | | | | | | | | |
-                    | |B| | | | | | |
-                    | | | | | |K| | |
-                    | | |n| | | | | |
-                    | | | | | | | | |
-                    | | | |q| |k| | |
-                    | | | | | | | | |
-                    """));
+                | | | | | | | | |
+                | | | | | | | | |
+                | |B| | | | | | |
+                | | | | | |K| | |
+                | | |n| | | | | |
+                | | | | | | | | |
+                | | | |q| |k| | |
+                | | | | | | | | |
+                """));
 
         // Knight moves
         ChessPosition knightPosition = new ChessPosition(4, 3);
@@ -43,15 +43,15 @@ public class ValidMovesTests {
 
         var game = new ChessGame();
         game.setBoard(loadBoard("""
-                    | | | | | | | | |
-                    | | | | | | | | |
-                    | | | | | | | | |
-                    | |r| | | |R| |K|
-                    | | | | | | | | |
-                    | | | | | | | | |
-                    | | | | | | | | |
-                    | | | | | | | | |
-                    """));
+                | | | | | | | | |
+                | | | | | | | | |
+                | | | | | | | | |
+                | |r| | | |R| |K|
+                | | | | | | | | |
+                | | | | | | | | |
+                | | | | | | | | |
+                | | | | | | | | |
+                """));
 
         ChessPosition rookPosition = new ChessPosition(5, 6);
         var validMoves = loadMoves(rookPosition, new int[][]{
@@ -67,15 +67,15 @@ public class ValidMovesTests {
 
         var game = new ChessGame();
         game.setBoard(loadBoard("""
-                    | | | | | | | |Q|
-                    | | | | | | | | |
-                    | | | | | | | | |
-                    | | | | | | | | |
-                    | | | |r| | | | |
-                    | | | | | | | | |
-                    | |k| | | | | | |
-                    | | | | | | | | |
-                    """));
+                | | | | | | | |Q|
+                | | | | | | | | |
+                | | | | | | | | |
+                | | | | | | | | |
+                | | | |r| | | | |
+                | | | | | | | | |
+                | |k| | | | | | |
+                | | | | | | | | |
+                """));
 
         ChessPosition position = new ChessPosition(4, 4);
         Assertions.assertTrue(game.validMoves(position).isEmpty(),
@@ -89,15 +89,15 @@ public class ValidMovesTests {
 
         var game = new ChessGame();
         game.setBoard(loadBoard("""
-                    |R| | | | | | | |
-                    | | | |k| | | |b|
-                    | | | | |P| | | |
-                    | | |Q|n| | | | |
-                    | | | | | | | | |
-                    | | | | | | | |r|
-                    | | | | | |p| | |
-                    | |q| | | | | | |
-                    """));
+                |R| | | | | | | |
+                | | | |k| | | |b|
+                | | | | |P| | | |
+                | | |Q|n| | | | |
+                | | | | | | | | |
+                | | | | | | | |r|
+                | | | | | |p| | |
+                | |q| | | | | | |
+                """));
 
         //get positions
         ChessPosition kingPosition = new ChessPosition(7, 4);
@@ -132,15 +132,15 @@ public class ValidMovesTests {
 
         var game = new ChessGame();
         game.setBoard(loadBoard("""
-                    | | | | | | | | |
-                    | | | | | | | | |
-                    | | | | | | | | |
-                    | | | | | | | | |
-                    | | | | | |k| | |
-                    | | | | | | | | |
-                    | | | | | |K| | |
-                    | | | | | | | | |
-                    """));
+                | | | | | | | | |
+                | | | | | | | | |
+                | | | | | | | | |
+                | | | | | | | | |
+                | | | | | |k| | |
+                | | | | | | | | |
+                | | | | | |K| | |
+                | | | | | | | | |
+                """));
 
         ChessPosition position = new ChessPosition(2, 6);
         var validMoves = loadMoves(position, new int[][]{

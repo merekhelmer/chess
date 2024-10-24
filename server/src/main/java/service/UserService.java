@@ -1,9 +1,10 @@
 package service;
 
+import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
+import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
-
-import dataaccess.*;
 
 public class UserService {
     private final UserDAO userDAO;
@@ -14,20 +15,18 @@ public class UserService {
         this.authDAO = authDAO;
     }
 
-    // Registration
     public AuthData register(UserData user) throws DataAccessException {
         UserData existingUser = userDAO.getUser(user.username());
         if (existingUser != null) {
             throw new DataAccessException("User already exists");
         }
-        //create user
+
         userDAO.createUser(user);
         AuthData auth = new AuthData(generateAuthToken(), user.username());
         authDAO.createAuth(auth);
         return auth;
     }
 
-    // Login
     public AuthData login(UserData user) throws DataAccessException {
         UserData existingUser = userDAO.getUser(user.username());
 
@@ -42,8 +41,6 @@ public class UserService {
         return auth;
     }
 
-
-    // Logout
     public void logout(String authToken) throws DataAccessException {
         AuthData authData = authDAO.getAuth(authToken);
         if (authData == null) {
@@ -52,14 +49,11 @@ public class UserService {
         authDAO.deleteAuth(authToken);
     }
 
-
     public void clear() {
         userDAO.clear();
         authDAO.clear();
     }
 
-
-    // generate random auth token
     private String generateAuthToken() {
         return java.util.UUID.randomUUID().toString();
     }

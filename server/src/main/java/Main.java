@@ -1,12 +1,8 @@
-import chess.*;
-import server.*;
-import dataaccess.DataAccessException;
 import server.Server;
 
 public class Main {
 
-    public static void main(String[] args) throws DataAccessException {
-        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+    public static void main(String[] args) {
         System.out.println("♕ 240 Chess Server");
 
         Server server = new Server();

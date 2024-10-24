@@ -2,11 +2,10 @@ package passoff.chess.extracredit;
 
 import chess.*;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static passoff.chess.TestUtilities.*;
+import static passoff.chess.TestUtilities.loadBoard;
 
 /**
  * Tests if the ChessGame implementation can handle En Passant moves
@@ -183,14 +182,14 @@ public class EnPassantTests {
     @DisplayName("Can Only En Passant on Next Turn")
     public void missedEnPassant() throws InvalidMoveException {
         ChessBoard board = loadBoard("""
+                      | | | | | | | | |
+                | | |p| | | | | |
+                | | | | | | | |P|
+                | |P| | | | | | |
                 | | | | | | | | |
-		        | | |p| | | | | |
-		        | | | | | | | |P|
-		        | |P| | | | | | |
-		        | | | | | | | | |
-		        | | | | | | | |p|
-		        | | | | | | | | |
-		        | | | | | | | | |
+                | | | | | | | |p|
+                | | | | | | | | |
+                | | | | | | | | |
                 """);
         ChessGame game = new ChessGame();
         game.setBoard(board);

@@ -1,14 +1,19 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
-import chess.ChessGame;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,6 +37,7 @@ public class GameServiceTest {
             public AuthData getAuth(String authToken) {
                 return authDataMap.get(authToken);
             }
+
             @Override
             public void createAuth(AuthData auth) {
             }
@@ -98,9 +104,7 @@ public class GameServiceTest {
     @Test
     public void testCreateGameNegative() {
         String invalidAuthToken = "invalidToken";
-        assertThrows(DataAccessException.class, () -> {
-            gameService.createGame("Test Game", invalidAuthToken);
-        });
+        assertThrows(DataAccessException.class, () -> gameService.createGame("Test Game", invalidAuthToken));
     }
 
     @Test
@@ -120,9 +124,7 @@ public class GameServiceTest {
     public void testJoinGameNegative() {
         String invalidAuthToken = "invalidToken";
 
-        assertThrows(DataAccessException.class, () -> {
-            gameService.joinGame(1, ChessGame.TeamColor.WHITE, invalidAuthToken);
-        });
+        assertThrows(DataAccessException.class, () -> gameService.joinGame(1, ChessGame.TeamColor.WHITE, invalidAuthToken));
     }
 
     @Test
@@ -142,9 +144,7 @@ public class GameServiceTest {
     public void testListGamesNegative() {
         String invalidAuthToken = "invalidToken";
 
-        assertThrows(DataAccessException.class, () -> {
-            gameService.listGames(invalidAuthToken);
-        });
+        assertThrows(DataAccessException.class, () -> gameService.listGames(invalidAuthToken));
     }
 
     @Test

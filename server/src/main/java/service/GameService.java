@@ -1,11 +1,12 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
 import dataaccess.DataAccessException;
+import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
-import chess.ChessGame;
+
 import java.util.List;
 
 public class GameService {
@@ -48,7 +49,7 @@ public class GameService {
         }
 
         int gameID = (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
-        // create new game
+
         GameData gameData = new GameData(gameID, null, null, gameName, new ChessGame());
         gameDAO.createGame(gameData);
 
