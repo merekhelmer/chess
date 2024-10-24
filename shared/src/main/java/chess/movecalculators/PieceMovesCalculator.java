@@ -10,13 +10,31 @@ import java.util.Collection;
 
 public abstract class PieceMovesCalculator {
 
+    // movement directions
+    protected static final int[][] ORTHOGONAL_DIRECTIONS = {
+            {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+    };
+    protected static final int[][] DIAGONAL_DIRECTIONS = {
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+    };
+    protected static final int[][] ALL_DIRECTIONS = {
+            {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+    };
+    private static final int MIN_ROW = 1;
+    private static final int MAX_ROW = 8;
+    private static final int MIN_COL = 1;
+    private static final int MAX_COL = 8;
+
     protected abstract int[][] getDirections();
 
-    //subclasses customize how far a piece can move
     protected int maxDistance() {
-        return 7;  //default: entire board
+        return 7;
     }
 
+    /**
+     * Calculates the possible moves for a piece from a given position.
+     */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         Collection<ChessMove> validMoves = new ArrayList<>();
         ChessPiece myPiece = board.getPiece(position);
@@ -33,8 +51,7 @@ public abstract class PieceMovesCalculator {
                 row += direction[0];
                 col += direction[1];
 
-
-                if (row < 1 || row > 8 || col < 1 || col > 8) {
+                if (row < MIN_ROW || row > MAX_ROW || col < MIN_COL || col > MAX_COL) {
                     break;
                 }
 
@@ -42,16 +59,15 @@ public abstract class PieceMovesCalculator {
                 ChessPiece pieceAtPosition = board.getPiece(newPosition);
 
                 if (pieceAtPosition == null) {
-                    //no blocking piece, add this move
                     validMoves.add(new ChessMove(position, newPosition, null));
-                } else if (!pieceAtPosition.getTeamColor().equals(myPiece.getTeamColor())) {
-                    //capture opponent's piece
-                    validMoves.add(new ChessMove(position, newPosition, null));
-                    break;  //stop after capturing
-                } else {
-                    //blocked by friendly piece
-                    break;
+                    continue;
                 }
+
+                if (!pieceAtPosition.getTeamColor().equals(myPiece.getTeamColor())) {
+                    validMoves.add(new ChessMove(position, newPosition, null));
+                }
+
+                break;
             }
         }
 
