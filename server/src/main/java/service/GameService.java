@@ -66,14 +66,5 @@ public class GameService {
     public void clear() {
         gameDAO.clear();
     }
-
-    private boolean gameExists(int gameID) {
-        try {
-            gameDAO.getGame(gameID);
-            return true;
-        } catch (DataAccessException e) {
-            return false;
-        }
-    }
 }
 
