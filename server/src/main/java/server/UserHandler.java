@@ -46,20 +46,27 @@ public class UserHandler {
     public Object login(Request req, Response resp) {
         UserData loginData = gson.fromJson(req.body(), UserData.class);
 
+        if (loginData.username() == null || loginData.password() == null) {
+            return handleError(resp, 400, "Error: No username and/or password given");
+        }
+
         try {
+            // Attempt to log in the user
             AuthData authData = userService.login(loginData);
-            resp.status(200);
+            resp.status(200);  // OK
             return gson.toJson(authData);
 
         } catch (DataAccessException e) {
-            if (e.getMessage().contains("Invalid credentials")) {
-                return handleError(resp, 401, "Error: Invalid credentials");
+            // Handle incorrect username or password
+            if (e.getMessage().contains("Invalid username") || e.getMessage().contains("Incorrect password")) {
+                return handleError(resp, 401, "Error: Unauthorized - Invalid username or password");
             }
+            // For any other errors, return 500 Internal Server Error
             return handleError(resp, 500, "Error: Internal server error");
         }
     }
 
-    // Logout (DELETE /session)
+
     // Logout (DELETE /session)
     public Object logout(Request req, Response resp) {
         // Extract the authorization token from the request headers

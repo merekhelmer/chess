@@ -4,7 +4,6 @@ import model.AuthData;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class MemoryAuthDAO implements AuthDAO {
     private final Map<String, AuthData> authTokens;
 
@@ -18,8 +17,12 @@ public class MemoryAuthDAO implements AuthDAO {
     }
 
     @Override
-    public AuthData getAuth(String authToken) {
-        return authTokens.get(authToken);
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        AuthData authData = authTokens.get(authToken);
+        if (authData == null) {
+            return null;
+        }
+        return authData;
     }
 
     @Override
@@ -32,3 +35,4 @@ public class MemoryAuthDAO implements AuthDAO {
         authTokens.clear();
     }
 }
+

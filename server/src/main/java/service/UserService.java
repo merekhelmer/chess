@@ -30,17 +30,18 @@ public class UserService {
     // Login
     public AuthData login(UserData user) throws DataAccessException {
         UserData existingUser = userDAO.getUser(user.username());
+
         if (existingUser == null) {
-            throw new DataAccessException("User does not exist");
+            throw new DataAccessException("Invalid username");
         }
-        if (existingUser.password().equals(user.password())) {
-            AuthData auth = new AuthData(generateAuthToken(), user.username());
-            authDAO.createAuth(auth);
-            return auth;
-        } else {
-            throw new DataAccessException("Incorrect username or password");
+        if (!existingUser.password().equals(user.password())) {
+            throw new DataAccessException("Incorrect password");
         }
+        AuthData auth = new AuthData(generateAuthToken(), user.username());
+        authDAO.createAuth(auth);
+        return auth;
     }
+
 
     // Logout
     public void logout(String authToken) throws DataAccessException {

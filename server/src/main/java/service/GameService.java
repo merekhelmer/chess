@@ -6,7 +6,6 @@ import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import chess.ChessGame;
-
 import java.util.List;
 
 public class GameService {
@@ -18,63 +17,63 @@ public class GameService {
         this.authDAO = authDAO;
     }
 
-    // Join Game logic
-    public GameData joinGame(int gameID, String playerColor, String authToken) throws DataAccessException {
+    public GameData joinGame(int gameID, ChessGame.TeamColor playerColor, String authToken) throws DataAccessException {
         AuthData authData = authDAO.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("Invalid auth token.");
+            throw new DataAccessException("Error: Invalid auth token");
         }
 
-        // retrieve the game by gameID
-        GameData gameData = gameDAO.getGame(gameID);
-        if (gameData == null) {
-            throw new DataAccessException("Game not found.");
+        GameData game = gameDAO.getGame(gameID);
+        if (game == null) {
+            throw new DataAccessException("Error: Game not found");
         }
 
-        // check if the requested playerColor is available
-        if ((playerColor.equals("white") && gameData.whiteUsername() != null) ||
-                (playerColor.equals("black") && gameData.blackUsername() != null)) {
-            throw new DataAccessException("Player color already taken.");
-        }
-
-        // update game with the new player
-        GameData updatedGameData;
-        if (playerColor.equals("white")) {
-            updatedGameData = new GameData(gameData.gameID(), authData.username(), gameData.blackUsername(), gameData.gameName(), gameData.game());
+        // check if the requested color is available
+        if (playerColor == ChessGame.TeamColor.WHITE && game.whiteUsername() == null) {
+            game = new GameData(game.gameID(), authData.username(), game.blackUsername(), game.gameName(), game.game());
+        } else if (playerColor == ChessGame.TeamColor.BLACK && game.blackUsername() == null) {
+            game = new GameData(game.gameID(), game.whiteUsername(), authData.username(), game.gameName(), game.game());
         } else {
-            updatedGameData = new GameData(gameData.gameID(), gameData.whiteUsername(), authData.username(), gameData.gameName(), gameData.game());
+            throw new DataAccessException("Error: Requested team color is already taken");
         }
-        gameDAO.updateGame(updatedGameData);
 
-        return updatedGameData;
+        gameDAO.updateGame(game);
+        return game;
     }
 
-    // Create Game logic
     public GameData createGame(String gameName, String authToken) throws DataAccessException {
         AuthData authData = authDAO.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("Invalid auth token.");
+            throw new DataAccessException("Error: Invalid auth token");
         }
 
-        // Create new game with the user as the white player
-        ChessGame chessGame = new ChessGame();
-        GameData gameData = new GameData(0, authData.username(), null, gameName, chessGame);
+        int gameID = (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
+        // create new game
+        GameData gameData = new GameData(gameID, null, null, gameName, new ChessGame());
         gameDAO.createGame(gameData);
 
         return gameData;
     }
 
-    // List Games logic
     public List<GameData> listGames(String authToken) throws DataAccessException {
         AuthData authData = authDAO.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("Invalid auth token.");
+            throw new DataAccessException("Error: Invalid auth token.");
         }
-        // retrieve all games
         return gameDAO.listGames();
     }
 
     public void clear() {
-        gameDAO.clear();  // Clear the in-memory game DAO or SQL DAO
+        gameDAO.clear();
+    }
+
+    private boolean gameExists(int gameID) {
+        try {
+            gameDAO.getGame(gameID);
+            return true;
+        } catch (DataAccessException e) {
+            return false;
+        }
     }
 }
+
