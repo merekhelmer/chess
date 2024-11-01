@@ -15,22 +15,24 @@ public class Server {
     private final UserHandler userHandler;
     private final GameHandler gameHandler;
 
+
     public Server() {
-        MemoryUserDAO userDAO = new MemoryUserDAO();
-        AuthDAO authDAO = new MemoryAuthDAO();
-        GameDAO gameDAO = new MemoryGameDAO();
+        this(new UserService(new MemoryUserDAO(), new MemoryAuthDAO()),
+                new GameService(new MemoryGameDAO(), new MemoryAuthDAO()));
+    }
 
-        this.userService = new UserService(userDAO, authDAO);
-        this.gameService = new GameService(gameDAO, authDAO);
+    public Server(UserService userService, GameService gameService) {
+        this.userService = userService;
+        this.gameService = gameService;
 
-        this.userHandler = new UserHandler(userService);
-        this.gameHandler = new GameHandler(gameService);
+        this.userHandler = new UserHandler(this.userService);
+        this.gameHandler = new GameHandler(this.gameService);
     }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
-        // serve static files from the /web directory
+        // Serve static files from the /web directory
         Spark.staticFiles.location("/web");
 
         Spark.delete("/db", this::clearDB);
@@ -42,7 +44,6 @@ public class Server {
         Spark.post("/game", gameHandler::createGame);
         Spark.put("/game", gameHandler::joinGame);
 
-        // global exception handling
         Spark.exception(Exception.class, this::genericExceptionHandler);
 
         Spark.awaitInitialization();
@@ -67,6 +68,4 @@ public class Server {
         resp.body(String.format("{ \"message\": \"Error: %s\" }", ex.getMessage()));
     }
 }
-
-
 
