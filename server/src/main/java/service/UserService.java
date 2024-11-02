@@ -5,6 +5,8 @@ import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
+
 
 public class UserService {
     private final UserDAO userDAO;
@@ -33,13 +35,16 @@ public class UserService {
         if (existingUser == null) {
             throw new DataAccessException("Invalid username");
         }
-        if (!existingUser.password().equals(user.password())) {
+        // verify password with BCrypt
+        if (!BCrypt.checkpw(user.password(), existingUser.password())) {
             throw new DataAccessException("Incorrect password");
         }
+        // generate new auth token
         AuthData auth = new AuthData(generateAuthToken(), user.username());
         authDAO.createAuth(auth);
         return auth;
     }
+
 
     public void logout(String authToken) throws DataAccessException {
         AuthData authData = authDAO.getAuth(authToken);

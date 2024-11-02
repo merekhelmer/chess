@@ -60,7 +60,7 @@ public class Server {
 
     private Object clearDB(Request req, Response resp) throws DataAccessException {
         gameService.clear();   // clear games first to remove dependencies
-        userService.clear();   // clear users and auth data last to satisfy FK constraints
+        userService.clear();
 
         resp.status(200);
         return "{}";

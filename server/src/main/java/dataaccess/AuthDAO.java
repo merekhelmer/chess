@@ -10,5 +10,5 @@ public interface AuthDAO {
 
     void deleteAuth(String authToken);
 
-    void clear();
+    void clear() throws DataAccessException;
 }
