@@ -1,6 +1,8 @@
 package dataaccess;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class DatabaseManager {
@@ -65,7 +67,7 @@ public class DatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    static void createDatabase() throws DataAccessException {
+    public static void createDatabase() throws DataAccessException {
         try {
             var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
             var statement = "CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME;
@@ -77,7 +79,7 @@ public class DatabaseManager {
         }
     }
 
-    static void createTable() throws DataAccessException {
+    public static void createTable() throws DataAccessException {
         try (var conn = getConnection()) {
             for (String sql : CREATE_TABLE_STATEMENTS) {
                 try (var statement = conn.prepareStatement(sql)) {
