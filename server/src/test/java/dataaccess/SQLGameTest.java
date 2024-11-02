@@ -25,13 +25,13 @@ class SQLGameTest {
     @BeforeEach
     void setup() throws SQLException {
         gameDAO = new SQLGameDAO();
-        userDAO = new SQLUserDAO(); // Initialize userDAO
-        clearDatabase(); // Clear the database before each test
+        userDAO = new SQLUserDAO();
+        clearDatabase(); // clear database before each test
     }
 
     private void clearDatabase() throws SQLException {
         try (var conn = DatabaseManager.getConnection()) {
-            // Clear each table in reverse dependency order to avoid foreign key issues
+            // clear each table in reverse dependency order to avoid foreign key issues
             try (var stmt = conn.createStatement()) {
                 stmt.executeUpdate("DELETE FROM Game");
                 stmt.executeUpdate("DELETE FROM Auth");
@@ -45,7 +45,6 @@ class SQLGameTest {
     @Test
     @Order(1)
     void createGamePositive() throws DataAccessException {
-        // Ensure users exist before creating the game
         userDAO.createUser(new UserData("whitePlayer", "password", "white@example.com"));
         userDAO.createUser(new UserData("blackPlayer", "password", "black@example.com"));
 

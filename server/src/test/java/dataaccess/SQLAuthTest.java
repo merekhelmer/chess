@@ -66,9 +66,7 @@ class SQLAuthTest {
     void createAuthNegativeInvalidUser() {
         // attempt to create Auth token for non-existent user
         AuthData authData = new AuthData("authToken1", "invalidUser");
-        assertThrows(DataAccessException.class, () -> {
-            authDAO.createAuth(authData);
-        }, "Should throw exception for non-existent user");
+        assertThrows(DataAccessException.class, () -> authDAO.createAuth(authData), "Should throw exception for non-existent user");
     }
 
     @Test

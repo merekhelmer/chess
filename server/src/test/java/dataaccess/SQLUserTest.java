@@ -27,7 +27,7 @@ class SQLUserTest {
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.createStatement()) {
 
-            // Clear tables in the correct order
+            // clear tables in the correct order
             stmt.executeUpdate("DELETE FROM Game");
             stmt.executeUpdate("DELETE FROM Auth");
             stmt.executeUpdate("DELETE FROM User");
