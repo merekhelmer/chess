@@ -52,6 +52,4 @@ public class SQLUserDAO implements UserDAO {
             throw new DataAccessException("Error clearing users: " + e.getMessage());
         }
     }
-
-
 }

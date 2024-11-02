@@ -6,6 +6,7 @@ import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.*;
 
@@ -95,18 +96,22 @@ public class UserServiceTest {
 
     @Test
     public void testLoginPositive() throws DataAccessException {
-        UserData existingUser = new UserData("user1", "password1", "user1@example.com");
+        UserData existingUser = new UserData("user1", BCrypt.hashpw("password1", BCrypt.gensalt()), "user1@example.com");
         userDataMap.put(existingUser.username(), existingUser);
 
-        AuthData authData = userService.login(existingUser);
+        // Attempt login with plaintext password
+        UserData loginAttempt = new UserData("user1", "password1", "user1@example.com");
+        AuthData authData = userService.login(loginAttempt);
+
         assertNotNull(authData);
     }
 
     @Test
     public void testLoginNegative() {
-        UserData existingUser = new UserData("user1", "password1", "user1@example.com");
+        UserData existingUser = new UserData("user1", BCrypt.hashpw("password1", BCrypt.gensalt()), "user1@example.com");
         userDataMap.put(existingUser.username(), existingUser);
 
+        // Attempt login with incorrect password
         UserData loginAttempt = new UserData("user1", "wrongPassword", "user1@example.com");
 
         assertThrows(DataAccessException.class, () -> {
