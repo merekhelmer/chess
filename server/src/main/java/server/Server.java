@@ -59,8 +59,8 @@ public class Server {
     }
 
     private Object clearDB(Request req, Response resp) throws DataAccessException {
-        gameService.clear();   // Clear games first to remove dependencies
-        userService.clear();   // Clear users and auth data last to satisfy FK constraints
+        gameService.clear();   // clear games first to remove dependencies
+        userService.clear();   // clear users and auth data last to satisfy FK constraints
 
         resp.status(200);
         return "{}";
