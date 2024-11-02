@@ -1,4 +1,3 @@
-import dataaccess.DatabaseManager;
 import server.Server;
 
 public class Main {
@@ -7,10 +6,6 @@ public class Main {
         System.out.println("♕ 240 Chess Server");
 
         try {
-            // ensure the database and tables are created if they do not already exist
-            DatabaseManager.createDatabase();
-            DatabaseManager.createTable();
-
             Server server = new Server();
             int port = server.run(8080);
 
@@ -21,5 +16,3 @@ public class Main {
         }
     }
 }
-
-

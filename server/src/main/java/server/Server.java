@@ -28,9 +28,18 @@ public class Server {
     }
 
     public int run(int desiredPort) {
+        // initialize the database and tables first
+        try {
+            DatabaseManager.createDatabase();
+            DatabaseManager.createTables();
+        } catch (DataAccessException e) {
+            System.err.println("Failed to initialize database: " + e.getMessage());
+            e.printStackTrace();
+        }
+
         Spark.port(desiredPort);
 
-        // serve static files from the /web directory
+        // Serve static files from the /web directory
         Spark.staticFiles.location("/web");
 
         Spark.delete("/db", this::clearDB);
@@ -42,7 +51,7 @@ public class Server {
         Spark.post("/game", gameHandler::createGame);
         Spark.put("/game", gameHandler::joinGame);
 
-        // global exception handling
+        // Global exception handling
         Spark.exception(Exception.class, this::genericExceptionHandler);
 
         Spark.awaitInitialization();

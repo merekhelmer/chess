@@ -23,7 +23,7 @@ class SQLAuthTest {
             stmt.executeUpdate("DROP TABLE IF EXISTS Auth");
             stmt.executeUpdate("DROP TABLE IF EXISTS User");
         }
-        DatabaseManager.createTable();
+        DatabaseManager.createTables();
     }
 
     @BeforeEach

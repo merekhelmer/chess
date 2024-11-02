@@ -14,7 +14,7 @@ class SQLUserTest {
     @BeforeAll
     static void setupDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
-        DatabaseManager.createTable();
+        DatabaseManager.createTables();
     }
 
     @BeforeEach

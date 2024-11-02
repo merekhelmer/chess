@@ -79,7 +79,8 @@ public class DatabaseManager {
         }
     }
 
-    public static void createTable() throws DataAccessException {
+
+    public static void createTables() throws DataAccessException {
         try (var conn = getConnection()) {
             for (String sql : CREATE_TABLE_STATEMENTS) {
                 try (var statement = conn.prepareStatement(sql)) {
@@ -90,6 +91,7 @@ public class DatabaseManager {
             throw new DataAccessException("Error creating tables: " + e.getMessage());
         }
     }
+
 
     /**
      * Create a connection to the database and sets the catalog based upon the
@@ -105,11 +107,12 @@ public class DatabaseManager {
      */
     static Connection getConnection() throws DataAccessException {
         try {
-            var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
-            conn.setCatalog(DATABASE_NAME);
+            String dbUrl = CONNECTION_URL + "/" + DATABASE_NAME;
+            var conn = DriverManager.getConnection(dbUrl, USER, PASSWORD);
             return conn;
         } catch (SQLException e) {
             throw new DataAccessException("Error connecting to database: " + e.getMessage());
         }
     }
+
 }
