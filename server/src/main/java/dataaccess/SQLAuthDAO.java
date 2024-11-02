@@ -11,7 +11,7 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public void createAuth(AuthData auth) {
-        String sql = "INSERT INTO Auth (authToken, username) VALUES (?, ?)";
+        var sql = "INSERT INTO Auth (authToken, username) VALUES (?, ?)";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, auth.authToken());
@@ -24,7 +24,7 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
-        String sql = "SELECT * FROM Auth WHERE authToken = ?";
+        var sql = "SELECT * FROM Auth WHERE authToken = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, authToken);
@@ -41,7 +41,7 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public void deleteAuth(String authToken) {
-        String sql = "DELETE FROM Auth WHERE authToken = ?";
+        var sql = "DELETE FROM Auth WHERE authToken = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, authToken);
@@ -52,13 +52,15 @@ public class SQLAuthDAO implements AuthDAO {
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataAccessException {
         String sql = "DELETE FROM Auth";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
         } catch (SQLException e) {
-            System.err.println();
+            throw new DataAccessException("Error clearing auth tokens: " + e.getMessage());
         }
     }
+
+
 }

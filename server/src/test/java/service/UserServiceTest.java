@@ -70,7 +70,7 @@ public class UserServiceTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    public void tearDown() throws DataAccessException {
         userDAO.clear();
         authDAO.clear();
     }
@@ -137,7 +137,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testClearPositive() {
+    public void testClearPositive() throws DataAccessException {
         userDataMap.put("user1", new UserData("user1", "password1", "user1@example.com"));
         authDataMap.put("authToken1", new AuthData("authToken1", "user1"));
 

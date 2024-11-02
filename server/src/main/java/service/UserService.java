@@ -49,7 +49,7 @@ public class UserService {
         authDAO.deleteAuth(authToken);
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         userDAO.clear();
         authDAO.clear();
     }

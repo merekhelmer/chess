@@ -12,8 +12,8 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
-        String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
-        String sql = "INSERT INTO User (username, password, email) VALUES (?, ?, ?)";
+        var hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+        var sql = "INSERT INTO User (username, password, email) VALUES (?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, user.username());
@@ -27,7 +27,7 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
-        String sql = "SELECT * FROM User WHERE username = ?";
+        var sql = "SELECT * FROM User WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, username);
@@ -43,22 +43,15 @@ public class SQLUserDAO implements UserDAO {
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataAccessException {
         String sql = "DELETE FROM User";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
         } catch (SQLException e) {
-            System.err.println();
+            throw new DataAccessException("Error clearing users: " + e.getMessage());
         }
     }
 
-    public boolean verifyPassword(String username, String providedPassword) throws DataAccessException {
-        UserData user = getUser(username);
-        if (user == null) {
-            throw new DataAccessException("User not found.");
-        }
-        // compare given password with stored hashed password
-        return BCrypt.checkpw(providedPassword, user.password());
-    }
+
 }

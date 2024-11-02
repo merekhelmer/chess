@@ -84,7 +84,7 @@ public class GameServiceTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    public void tearDown() throws DataAccessException {
         // clear after each test
         authDAO.clear();
         gameDAO.clear();
