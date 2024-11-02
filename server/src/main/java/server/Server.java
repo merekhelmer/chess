@@ -15,24 +15,26 @@ public class Server {
     private final UserHandler userHandler;
     private final GameHandler gameHandler;
 
-
     public Server() {
-        this(new UserService(new MemoryUserDAO(), new MemoryAuthDAO()),
-                new GameService(new MemoryGameDAO(), new MemoryAuthDAO()));
-    }
+//        UserDAO userDAO = new MemoryUserDAO();
+//        AuthDAO authDAO = new MemoryAuthDAO();
+//        GameDAO gameDAO = new MemoryGameDAO();
 
-    public Server(UserService userService, GameService gameService) {
-        this.userService = userService;
-        this.gameService = gameService;
+        SQLUserDAO userDAO = new SQLUserDAO();
+        AuthDAO authDAO = new SQLAuthDAO();
+        GameDAO gameDAO = new SQLGameDAO();
 
-        this.userHandler = new UserHandler(this.userService);
-        this.gameHandler = new GameHandler(this.gameService);
+        this.userService = new UserService(userDAO, authDAO);
+        this.gameService = new GameService(gameDAO, authDAO);
+
+        this.userHandler = new UserHandler(userService);
+        this.gameHandler = new GameHandler(gameService);
     }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
-        // Serve static files from the /web directory
+        // serve static files from the /web directory
         Spark.staticFiles.location("/web");
 
         Spark.delete("/db", this::clearDB);
@@ -44,6 +46,7 @@ public class Server {
         Spark.post("/game", gameHandler::createGame);
         Spark.put("/game", gameHandler::joinGame);
 
+        // global exception handling
         Spark.exception(Exception.class, this::genericExceptionHandler);
 
         Spark.awaitInitialization();
@@ -55,9 +58,9 @@ public class Server {
         Spark.awaitStop();
     }
 
-    private Object clearDB(Request req, Response resp) {
-        userService.clear();
-        gameService.clear();
+    private Object clearDB(Request req, Response resp) throws DataAccessException {
+        gameService.clear();   // Clear games first to remove dependencies
+        userService.clear();   // Clear users and auth data last to satisfy FK constraints
 
         resp.status(200);
         return "{}";
@@ -68,4 +71,6 @@ public class Server {
         resp.body(String.format("{ \"message\": \"Error: %s\" }", ex.getMessage()));
     }
 }
+
+
 
