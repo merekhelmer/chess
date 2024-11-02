@@ -1,8 +1,8 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
-import chess.ChessGame;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,7 +23,7 @@ public class SQLGameDAO implements GameDAO {
             stmt.setString(2, game.gameName());
             stmt.setString(3, game.whiteUsername());
             stmt.setString(4, game.blackUsername());
-            stmt.setString(5, gson.toJson(game.game()));  // Serialize ChessGame object as JSON
+            stmt.setString(5, gson.toJson(game.game()));  // serialize ChessGame object as JSON
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Error creating game: " + e.getMessage());
@@ -101,6 +101,4 @@ public class SQLGameDAO implements GameDAO {
             throw new DataAccessException("Error clearing games: " + e.getMessage());
         }
     }
-
-
 }
