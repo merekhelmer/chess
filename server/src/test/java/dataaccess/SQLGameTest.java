@@ -3,101 +3,119 @@ package dataaccess;
 import chess.ChessGame;
 import model.GameData;
 import model.UserData;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class SQLGameTest {
+class SQLGameTest extends BaseSQLTest {
 
     private SQLGameDAO gameDAO;
-    private SQLUserDAO userDAO; // Added to handle user creation
-
-    @BeforeAll
-    static void setupDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        DatabaseManager.createTables();
-    }
+    private SQLUserDAO userDAO;
 
     @BeforeEach
-    void setup() throws SQLException {
+    void setup() {
         gameDAO = new SQLGameDAO();
         userDAO = new SQLUserDAO();
-        clearDatabase(); // clear database before each test
     }
 
-    private void clearDatabase() throws SQLException {
-        try (var conn = DatabaseManager.getConnection()) {
-            // clear each table in reverse dependency order to avoid foreign key issues
-            try (var stmt = conn.createStatement()) {
-                stmt.executeUpdate("DELETE FROM Game");
-                stmt.executeUpdate("DELETE FROM Auth");
-                stmt.executeUpdate("DELETE FROM User");
-            }
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Test
-    @Order(1)
     void createGamePositive() throws DataAccessException {
-        userDAO.createUser(new UserData("whitePlayer", "password", "white@example.com"));
-        userDAO.createUser(new UserData("blackPlayer", "password", "black@example.com"));
-
-        GameData game = new GameData(1, "whitePlayer", "blackPlayer", "Game1", new ChessGame());
-        assertDoesNotThrow(() -> gameDAO.createGame(game));
-
-        GameData retrievedGame = gameDAO.getGame(1);
-        assertEquals(1, retrievedGame.gameID());
-        assertEquals("Game1", retrievedGame.gameName());
-    }
-
-    @Test
-    @Order(2)
-    void createGameNegativeDuplicate() throws DataAccessException {
         userDAO.createUser(new UserData("whitePlayer", "password", "white@example.com"));
         userDAO.createUser(new UserData("blackPlayer", "password", "black@example.com"));
 
         GameData game = new GameData(1, "whitePlayer", "blackPlayer", "Game1", new ChessGame());
         gameDAO.createGame(game);
 
-        assertThrows(DataAccessException.class, () -> gameDAO.createGame(game), "Should throw on duplicate gameID");
+        GameData retrievedGame = gameDAO.getGame(1);
+        assertNotNull(retrievedGame, "Game should be created and retrieved successfully");
+        assertEquals("Game1", retrievedGame.gameName(), "Game names should match");
     }
 
     @Test
-    @Order(3)
-    void listGamesPositive() throws DataAccessException {
-        userDAO.createUser(new UserData("whitePlayer1", "password", "white1@example.com"));
-        userDAO.createUser(new UserData("whitePlayer2", "password", "white2@example.com"));
+    void createGameNegative() throws DataAccessException {
+        userDAO.createUser(new UserData("player1", "password", "player1@example.com"));
+        userDAO.createUser(new UserData("player2", "password", "player2@example.com"));
 
-        gameDAO.createGame(new GameData(1, "whitePlayer1", null, "Game1", new ChessGame()));
-        gameDAO.createGame(new GameData(2, "whitePlayer2", null, "Game2", new ChessGame()));
+        GameData game1 = new GameData(1, "player1", "player2", "Game1", new ChessGame());
+        gameDAO.createGame(game1);
+
+        GameData gameDuplicate = new GameData(1, "player1", "player2", "GameDuplicate", new ChessGame());
+        assertThrows(DataAccessException.class, () -> gameDAO.createGame(gameDuplicate), "Cannot create a game with duplicate gameID");
+    }
+
+    @Test
+    void getGamePositive() throws DataAccessException {
+        userDAO.createUser(new UserData("player1", "password", "player1@example.com"));
+        GameData game = new GameData(1, "player1", null, "SoloGame", new ChessGame());
+        gameDAO.createGame(game);
+
+        GameData retrievedGame = gameDAO.getGame(1);
+        assertNotNull(retrievedGame, "Game should be retrieved successfully");
+        assertEquals("SoloGame", retrievedGame.gameName(), "Game names should match");
+    }
+
+    @Test
+    void getGameNegative() throws DataAccessException {
+        GameData retrievedGame = gameDAO.getGame(9999);
+        assertNull(retrievedGame, "Retrieving a non-existent game should return null");
+    }
+
+    @Test
+    void listGamesPositive() throws DataAccessException {
+        userDAO.createUser(new UserData("player1", "password", "player1@example.com"));
+        userDAO.createUser(new UserData("player2", "password", "player2@example.com"));
+
+        gameDAO.createGame(new GameData(1, "player1", null, "Game1", new ChessGame()));
+        gameDAO.createGame(new GameData(2, "player2", null, "Game2", new ChessGame()));
 
         List<GameData> games = gameDAO.listGames();
         assertEquals(2, games.size(), "Should list two games");
     }
 
     @Test
-    @Order(4)
-    void updateGamePositive() throws DataAccessException {
-        userDAO.createUser(new UserData("whitePlayer", "password", "white@example.com"));
-        userDAO.createUser(new UserData("blackPlayer", "password", "black@example.com"));
-        userDAO.createUser(new UserData("whitePlayerUpdated", "password", "whiteUpdated@example.com"));
-        userDAO.createUser(new UserData("blackPlayerUpdated", "password", "blackUpdated@example.com"));
+    void listGamesNegative() throws DataAccessException {
+        List<GameData> games = gameDAO.listGames();
+        assertTrue(games.isEmpty(), "Listing games when none exist should return empty list");
+    }
 
-        GameData game = new GameData(1, "whitePlayer", "blackPlayer", "Game1", new ChessGame());
+    @Test
+    void updateGamePositive() throws DataAccessException {
+        userDAO.createUser(new UserData("player1", "password", "player1@example.com"));
+        userDAO.createUser(new UserData("player2", "password", "player2@example.com"));
+        GameData game = new GameData(1, "player1", null, "OriginalGame", new ChessGame());
         gameDAO.createGame(game);
 
-        GameData updatedGame = new GameData(1, "whitePlayerUpdated", "blackPlayerUpdated", "Game1Updated", new ChessGame());
+        // update the game
+        GameData updatedGame = new GameData(1, "player1", "player2", "UpdatedGame", new ChessGame());
         gameDAO.updateGame(updatedGame);
 
+        // verify the update
         GameData retrievedGame = gameDAO.getGame(1);
-        assertEquals("whitePlayerUpdated", retrievedGame.whiteUsername());
-        assertEquals("Game1Updated", retrievedGame.gameName());
+        assertEquals("UpdatedGame", retrievedGame.gameName(), "Game name should be updated");
+        assertEquals("player2", retrievedGame.blackUsername(), "Black player username should be updated");
+    }
+
+    @Test
+    void updateGameNegative() throws DataAccessException {
+        GameData nonExistentGame = new GameData(9999, "player1", "player2", "NonExistentGame", new ChessGame());
+        assertThrows(DataAccessException.class, () -> gameDAO.updateGame(nonExistentGame), "Updating a non-existent game should throw DataAccessException");
+    }
+
+
+    @Test
+    void clearPositive() throws DataAccessException {
+        userDAO.createUser(new UserData("player1", "password", "player1@example.com"));
+        gameDAO.createGame(new GameData(1, "player1", null, "Game1", new ChessGame()));
+
+        gameDAO.clear();
+
+        List<GameData> games = gameDAO.listGames();
+        assertTrue(games.isEmpty(), "Game table should be empty after clear");
     }
 }
+
 

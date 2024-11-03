@@ -85,7 +85,11 @@ public class SQLGameDAO implements GameDAO {
             stmt.setString(3, game.gameName());
             stmt.setString(4, gson.toJson(game.game()));  // serialize ChessGame object as JSON
             stmt.setInt(5, game.gameID());
-            stmt.executeUpdate();
+            int rowsUpdated = stmt.executeUpdate();
+
+            if (rowsUpdated == 0) {
+                throw new DataAccessException("No game found with gameID: " + game.gameID());
+            }
         } catch (SQLException e) {
             throw new DataAccessException("Error updating game: " + e.getMessage());
         }
