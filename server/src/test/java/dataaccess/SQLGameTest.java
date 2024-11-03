@@ -100,9 +100,10 @@ class SQLGameTest extends BaseSQLTest {
     }
 
     @Test
-    void updateGameNegative() throws DataAccessException {
+    void updateGameNegative() {
         GameData nonExistentGame = new GameData(9999, "player1", "player2", "NonExistentGame", new ChessGame());
-        assertThrows(DataAccessException.class, () -> gameDAO.updateGame(nonExistentGame), "Updating a non-existent game should throw DataAccessException");
+        assertThrows(DataAccessException.class, () -> gameDAO.updateGame(nonExistentGame),
+                "Updating a non-existent game should throw DataAccessException");
     }
 
 
