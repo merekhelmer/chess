@@ -57,4 +57,65 @@ public class ServerFacade {
         JoinGameRequest request = new JoinGameRequest(playerColor, gameID);
         makeRequest("PUT", path, request, null, authToken);
     }
+
+    // Helper Methods
+    private <T> T makeRequest(String method, String path, Object requestBody, Class<T> responseClass, String authToken)
+            throws ResponseException {
+        try {
+            URL url = new URL(serverUrl + path);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod(method);
+
+            if (authToken != null) {
+                connection.setRequestProperty("Authorization", authToken);
+            }
+
+            if (requestBody != null) {
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", "application/json");
+                writeRequestBody(connection, requestBody);
+            }
+
+            connection.connect();
+            int responseCode = connection.getResponseCode();
+            if (!isSuccessful(responseCode)) {
+                String errorMessage = readErrorResponse(connection);
+                throw new ResponseException(responseCode, errorMessage);
+            }
+
+            return readResponseBody(connection, responseClass);
+
+        } catch (IOException e) {
+            throw new ResponseException(500, "Network error: " + e.getMessage());
+        }
+    }
+
+    private void writeRequestBody(HttpURLConnection connection, Object requestBody) throws IOException {
+        try (OutputStream os = connection.getOutputStream()) {
+            String json = gson.toJson(requestBody);
+            os.write(json.getBytes());
+        }
+    }
+
+    private <T> T readResponseBody(HttpURLConnection connection, Class<T> responseClass) throws IOException {
+        if (responseClass == null) {
+            return null;
+        }
+        try (InputStream is = connection.getInputStream()) {
+            InputStreamReader reader = new InputStreamReader(is);
+            return gson.fromJson(reader, responseClass);
+        }
+    }
+
+    private String readErrorResponse(HttpURLConnection connection) throws IOException {
+        try (InputStream is = connection.getErrorStream()) {
+            InputStreamReader reader = new InputStreamReader(is);
+            ErrorResult errorResult = gson.fromJson(reader, ErrorResult.class);
+            return errorResult.message();
+        }
+    }
+
+    private boolean isSuccessful(int statusCode) {
+        return statusCode >= 200 && statusCode < 300;
+    }
 }
