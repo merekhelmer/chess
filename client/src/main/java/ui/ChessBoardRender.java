@@ -88,4 +88,37 @@ public class ChessBoardRender {
         }
         out.println();
     }
+
+    private void applySquareColor(int row, int col, boolean isLightSquare) {
+        if (isLightSquare) {
+            out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+        } else {
+            out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+        }
+
+        // text color for better contrast
+        out.print(isLightSquare ? EscapeSequences.SET_TEXT_COLOR_BLACK : EscapeSequences.SET_TEXT_COLOR_WHITE);
+    }
+
+    private String getPieceSymbol(ChessPiece piece) {
+        if (piece == null) {
+            return "   ";
+        }
+
+        String pieceLetter = switch (piece.getPieceType()) {
+            case KING -> " K ";
+            case QUEEN -> " Q ";
+            case BISHOP -> " B ";
+            case KNIGHT -> " N ";
+            case ROOK -> " R ";
+            case PAWN -> " P ";
+        };
+
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+        } else {
+            out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+        }
+        return pieceLetter;
+    }
 }
