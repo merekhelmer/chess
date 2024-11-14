@@ -2,13 +2,20 @@ package client;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import model.*;
+import model.AuthData;
+import model.ErrorResult;
+import model.GameData;
+import model.UserData;
 import service.requests.CreateGameRequest;
 import service.requests.JoinGameRequest;
 import service.results.CreateGameResult;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 
 public class ServerFacade {
@@ -58,7 +65,13 @@ public class ServerFacade {
         makeRequest("PUT", path, request, null, authToken);
     }
 
-    // Helper Methods
+    public void clearDatabase() throws ResponseException {
+        String path = "/db";
+        makeRequest("DELETE", path, null, null, null);
+    }
+
+
+    // helper Methods
     private <T> T makeRequest(String method, String path, Object requestBody, Class<T> responseClass, String authToken)
             throws ResponseException {
         try {
@@ -119,7 +132,8 @@ public class ServerFacade {
         return statusCode >= 200 && statusCode < 300;
     }
 
-    public ChessGame getGameState(int i, String s) {
-        return null;
+    public ChessGame getGameState(int gameID, String authToken) {
+        return new ChessGame();
     }
+
 }

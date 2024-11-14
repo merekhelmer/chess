@@ -1,6 +1,9 @@
 package ui;
 
-import chess.*;
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 
 public class ChessBoardRender {
     private final ChessGame chessGame;
@@ -8,6 +11,7 @@ public class ChessBoardRender {
     public ChessBoardRender(ChessGame chessGame) {
         this.chessGame = chessGame;
     }
+
 
     public void renderBoard(boolean whiteAtBottom, ChessPosition selectedPos) {
         // clear the terminal screen

@@ -1,9 +1,10 @@
 package ui;
 
-import client.*;
+import chess.ChessGame.TeamColor;
+import client.ResponseException;
+import client.ServerFacade;
 import model.AuthData;
 import model.GameData;
-import chess.ChessGame.TeamColor;
 
 import java.util.List;
 import java.util.Scanner;
@@ -170,6 +171,8 @@ public class PostLoginREPL {
 
         } catch (NumberFormatException e) {
             System.out.println("Invalid input. Please enter a valid game number.");
+        } catch (ResponseException e) {
+            throw new RuntimeException(e);
         }
     }
 }

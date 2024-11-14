@@ -1,6 +1,7 @@
 package ui;
 
-import client.*;
+import client.ResponseException;
+import client.ServerFacade;
 import model.AuthData;
 import model.UserData;
 
