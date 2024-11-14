@@ -2,123 +2,114 @@ package ui;
 
 import chess.*;
 
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-
 public class ChessBoardRender {
-
     private final ChessGame chessGame;
-    private final PrintStream out;
-
-    private static final int BOARD_SIZE = 8;
-    private static final int SQUARE_HEIGHT = 1; // height of each square in lines
 
     public ChessBoardRender(ChessGame chessGame) {
         this.chessGame = chessGame;
-        this.out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-    }
-
-
-    public void renderInitialGame() {
-        // black's perspective
-        renderBoard(false, null);
-
-        // separator b/w boards
-        out.println();
-
-        // white's perspective
-        renderBoard(true, null);
     }
 
     public void renderBoard(boolean whiteAtBottom, ChessPosition selectedPos) {
-        // row traversal based on orientation
-        int startRow = whiteAtBottom ? 8 : 1;
-        int endRow = whiteAtBottom ? 0 : 9;
-        int rowStep = whiteAtBottom ? -1 : 1;
+        // clear the terminal screen
+        System.out.print(EscapeSequences.ERASE_SCREEN);
+        System.out.flush();
 
-        renderColumnLabels(whiteAtBottom);
-
-        // render each row
-        for (int row = startRow; row != endRow; row += rowStep) {
-            renderRow(row, whiteAtBottom, selectedPos);
+        ChessBoard board = chessGame.getBoard();
+        if (board == null) {
+            System.out.println("Cannot render board: board is null.");
+            return;
         }
 
-        // render col labels again at the bottom
-        renderColumnLabels(whiteAtBottom);
+        printColumnLabels(whiteAtBottom);
 
-        // reset colors
-        out.print(EscapeSequences.RESET_TEXT_COLOR);
-        out.print(EscapeSequences.RESET_BG_COLOR);
-    }
-
-    private void renderRow(int row, boolean whiteAtBottom, ChessPosition selectedPos) {
-        out.printf(" %d ", row);
-
-        // col traversal based on orientation
-        int startCol = whiteAtBottom ? 1 : BOARD_SIZE;
-        int endCol = whiteAtBottom ? BOARD_SIZE + 1 : 0;
-        int colStep = whiteAtBottom ? 1 : -1;
-
-        for (int col = startCol; col != endCol; col += colStep) {
-            boolean isLightSquare = (row + col) % 2 != 0;
-
-            applySquareColor(row, col, isLightSquare);
-
-            ChessPiece piece = chessGame.getBoard().getPiece(new ChessPosition(row, col));
-            String pieceSymbol = getPieceSymbol(piece);
-            out.print(pieceSymbol);
+        // print each row of the board
+        for (int row = 8; row >= 1; row--) {
+            if (whiteAtBottom) {
+                renderRow(row, whiteAtBottom, board);
+            } else {
+                renderRow(9 - row, whiteAtBottom, board);
+            }
         }
 
-        // reset color at the end of the line
-        out.print(EscapeSequences.RESET_BG_COLOR);
-        out.print(EscapeSequences.RESET_TEXT_COLOR);
+        printColumnLabels(whiteAtBottom);
 
-        out.printf(" %d%n", row);
+        // reset any lingering styles
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+        System.out.print(EscapeSequences.RESET_BG_COLOR);
     }
 
-    private void renderColumnLabels(boolean whiteAtBottom) {
-        out.print("   "); // spacing for row labels
+    private void renderRow(int rowNumber, boolean whiteAtBottom, ChessBoard board) {
+        // print row number at the start
+        System.out.print(" " + rowNumber + " ");
 
-        char startFile = whiteAtBottom ? 'a' : 'h';
-        int fileStep = whiteAtBottom ? 1 : -1;
+        for (int col = 1; col <= 8; col++) {
+            int actualCol = whiteAtBottom ? col : 9 - col;
+            ChessPosition position = new ChessPosition(rowNumber, actualCol);
+            ChessPiece piece = board.getPiece(position);
 
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            char fileLabel = (char) (startFile + i * fileStep);
-            out.printf(" %c ", fileLabel);
+            // determine if the square is light or dark
+            boolean isLightSquare = (rowNumber + actualCol) % 2 != 0;
+            if (isLightSquare) {
+                System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+            } else {
+                System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+            }
+
+            // piece with appropriate coloring
+            if (piece != null) {
+                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                    System.out.print(getPieceSymbol(piece));
+                } else {
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+                    System.out.print(getPieceSymbol(piece));
+                }
+            } else {
+                System.out.print(EscapeSequences.EMPTY);
+            }
+
+            System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+            System.out.print(EscapeSequences.RESET_BG_COLOR);
         }
-        out.println();
+
+        System.out.println(" " + rowNumber);
     }
 
-    private void applySquareColor(int row, int col, boolean isLightSquare) {
-        if (isLightSquare) {
-            out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+
+    private void printColumnLabels(boolean whiteAtBottom) {
+        System.out.print("   "); // spacing for row numbers
+
+        if (whiteAtBottom) {
+            for (char c = 'a'; c <= 'h'; c++) {
+                System.out.print(" " + c + " ");
+            }
         } else {
-            out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+            for (char c = 'h'; c >= 'a'; c--) {
+                System.out.print(" " + c + " ");
+            }
         }
 
-        // text color for better contrast
-        out.print(isLightSquare ? EscapeSequences.SET_TEXT_COLOR_BLACK : EscapeSequences.SET_TEXT_COLOR_WHITE);
+        System.out.println();
     }
 
     private String getPieceSymbol(ChessPiece piece) {
         if (piece == null) {
-            return "   ";
+            return EscapeSequences.EMPTY;
         }
 
-        String pieceLetter = switch (piece.getPieceType()) {
-            case KING -> " K ";
-            case QUEEN -> " Q ";
-            case BISHOP -> " B ";
-            case KNIGHT -> " N ";
-            case ROOK -> " R ";
-            case PAWN -> " P ";
+        return switch (piece.getPieceType()) {
+            case KING ->
+                    piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_KING : EscapeSequences.BLACK_KING;
+            case QUEEN ->
+                    piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_QUEEN : EscapeSequences.BLACK_QUEEN;
+            case BISHOP ->
+                    piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_BISHOP : EscapeSequences.BLACK_BISHOP;
+            case KNIGHT ->
+                    piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_KNIGHT : EscapeSequences.BLACK_KNIGHT;
+            case ROOK ->
+                    piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_ROOK : EscapeSequences.BLACK_ROOK;
+            case PAWN ->
+                    piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_PAWN : EscapeSequences.BLACK_PAWN;
         };
-
-        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-            out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-        } else {
-            out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
-        }
-        return pieceLetter;
     }
 }
