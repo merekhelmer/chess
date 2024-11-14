@@ -62,10 +62,10 @@ public class ChessBoardRender {
             // piece with appropriate coloring
             if (piece != null) {
                 if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
                     System.out.print(getPieceSymbol(piece));
                 } else {
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
                     System.out.print(getPieceSymbol(piece));
                 }
             } else {
