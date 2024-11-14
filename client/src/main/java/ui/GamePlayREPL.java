@@ -12,7 +12,8 @@ public class GamePlayREPL {
     private final ChessGame.TeamColor playerColor;
     private final ChessBoardRender boardRenderer;
 
-    public GamePlayREPL(ServerFacade serverFacade, Scanner scanner, AuthData authData, int gameID, ChessGame.TeamColor playerColor) throws ResponseException {
+    public GamePlayREPL(ServerFacade serverFacade, Scanner scanner, AuthData authData, int gameID,
+                        ChessGame.TeamColor playerColor) throws ResponseException {
         this.playerColor = playerColor;
 
         ChessGame chessGame = serverFacade.getGameState(gameID, authData.authToken());

@@ -8,7 +8,6 @@ import requests.CreateGameRequest;
 import requests.JoinGameRequest;
 import results.CreateGameResult;
 import service.GameService;
-
 import spark.Request;
 import spark.Response;
 
