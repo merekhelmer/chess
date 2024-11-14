@@ -118,4 +118,8 @@ public class ServerFacade {
     private boolean isSuccessful(int statusCode) {
         return statusCode >= 200 && statusCode < 300;
     }
+
+    public ChessGame getGameState(int i, String s) {
+        return null;
+    }
 }

@@ -3,8 +3,7 @@ package ui;
 import client.*;
 import model.AuthData;
 import model.GameData;
-import service.results.CreateGameResult;
-import chess.ChessGame;
+import chess.ChessGame.TeamColor;
 
 import java.util.List;
 import java.util.Scanner;
@@ -13,7 +12,7 @@ public class PostLoginREPL {
 
     private final ServerFacade serverFacade;
     private final Scanner scanner;
-    private AuthData authData;
+    private final AuthData authData;
     private List<GameData> listedGames;
 
     public PostLoginREPL(ServerFacade serverFacade, Scanner scanner, AuthData authData) {
@@ -22,7 +21,7 @@ public class PostLoginREPL {
         this.authData = authData;
     }
 
-    public void start() {
+    public boolean start() {
         boolean loggedIn = true;
         while (loggedIn) {
             System.out.println("\nPlease enter a command (help, logout, create game, list games, play game, observe game):");
@@ -51,6 +50,7 @@ public class PostLoginREPL {
                     System.out.println("Unknown command.");
             }
         }
+        return !loggedIn; // return true if logged out
     }
 
     private void displayHelp() {
@@ -81,8 +81,8 @@ public class PostLoginREPL {
         String gameName = scanner.nextLine().trim();
 
         try {
-            CreateGameResult result = serverFacade.createGame(gameName, authData.authToken());
-            System.out.println("Game created with ID: " + result.gameID());
+            int gameID = serverFacade.createGame(gameName, authData.authToken()).gameID();
+            System.out.println("Game created with ID: " + gameID);
         } catch (ResponseException e) {
             System.out.println("Failed to create game: " + e.getMessage());
         }
@@ -100,13 +100,14 @@ public class PostLoginREPL {
                     String players = String.format("White: %s, Black: %s",
                             game.whiteUsername() != null ? game.whiteUsername() : "Open",
                             game.blackUsername() != null ? game.blackUsername() : "Open");
-                    System.out.printf("%d. %s (%s)%n", i + 1, game.gameName(), players);
+                    System.out.printf("%d. %s (ID: %d) (%s)%n", i + 1, game.gameName(), game.gameID(), players);
                 }
             }
         } catch (ResponseException e) {
             System.out.println("Failed to list games: " + e.getMessage());
         }
     }
+
 
     private void playGame() {
         if (listedGames == null || listedGames.isEmpty()) {
@@ -127,9 +128,9 @@ public class PostLoginREPL {
             System.out.print("Enter the color you want to play (WHITE or BLACK): ");
             String colorStr = scanner.nextLine().trim().toUpperCase();
 
-            ChessGame.TeamColor playerColor;
+            TeamColor playerColor;
             try {
-                playerColor = ChessGame.TeamColor.valueOf(colorStr);
+                playerColor = TeamColor.valueOf(colorStr);
             } catch (IllegalArgumentException e) {
                 System.out.println("Invalid color. Please enter WHITE or BLACK.");
                 return;
@@ -138,8 +139,8 @@ public class PostLoginREPL {
             serverFacade.joinGame(selectedGame.gameID(), playerColor, authData.authToken());
             System.out.println("Successfully joined the game.");
 
-            // start the gameplay REPL
-            new GamePlayREPL(serverFacade, scanner, authData, selectedGame.gameID(), playerColor).start();
+            GamePlayREPL gamePlayREPL = new GamePlayREPL(serverFacade, scanner, authData, selectedGame.gameID(), playerColor);
+            gamePlayREPL.displayInitialGame();
 
         } catch (NumberFormatException e) {
             System.out.println("Invalid input. Please enter a valid game number.");
@@ -164,8 +165,8 @@ public class PostLoginREPL {
             }
             GameData selectedGame = listedGames.get(gameNumber - 1);
 
-            // placeholder for phase 6
-            System.out.println("Observing game");
+            GamePlayREPL gamePlayREPL = new GamePlayREPL(serverFacade, scanner, authData, selectedGame.gameID(), null);
+            gamePlayREPL.displayInitialGame();
 
         } catch (NumberFormatException e) {
             System.out.println("Invalid input. Please enter a valid game number.");
