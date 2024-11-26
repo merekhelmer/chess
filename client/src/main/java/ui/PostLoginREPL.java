@@ -82,8 +82,8 @@ public class PostLoginREPL {
         String gameName = scanner.nextLine().trim();
 
         try {
-            int gameID = serverFacade.createGame(gameName, authData.authToken()).gameID();
-            System.out.println("Game created with ID: " + gameID);
+            serverFacade.createGame(gameName, authData.authToken());
+            System.out.println("Game created");
         } catch (ResponseException e) {
             System.out.println("Failed to create game: " + e.getMessage());
         }
@@ -101,7 +101,7 @@ public class PostLoginREPL {
                     String players = String.format("White: %s, Black: %s",
                             game.whiteUsername() != null ? game.whiteUsername() : "Open",
                             game.blackUsername() != null ? game.blackUsername() : "Open");
-                    System.out.printf("%d. %s (ID: %d) (%s)%n", i + 1, game.gameName(), game.gameID(), players);
+                    System.out.printf("%d. %s (%s)%n", i + 1, game.gameName(), players);
                 }
             }
         } catch (ResponseException e) {
