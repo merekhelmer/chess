@@ -18,6 +18,24 @@ public class ChessPosition {
         this.col = col;
     }
 
+    public static ChessPosition parsePosition(String position) throws InvalidMoveException {
+        if (position.length() != 2) {
+            throw new InvalidMoveException("Invalid position format. Use: <row> <col>");
+        }
+
+        char file = position.charAt(0);
+        char rank = position.charAt(1);
+
+        if (file < 'a' || file > 'h' || rank < '1' || rank > '8') {
+            throw new InvalidMoveException("Invalid position format. Use: <row> <col>");
+        }
+
+        int col = file - 'a' + 1;
+        int row = rank - '1';
+
+        return new ChessPosition(row, col);
+    }
+
     @Override
     public String toString() {
         return "ChessPosition{" +
