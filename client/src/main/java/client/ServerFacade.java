@@ -2,10 +2,7 @@ package client;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import model.AuthData;
-import model.ErrorResult;
-import model.GameData;
-import model.UserData;
+import model.*;
 import requests.CreateGameRequest;
 import requests.JoinGameRequest;
 import results.CreateGameResult;
@@ -66,6 +63,13 @@ public class ServerFacade {
         makeRequest("DELETE", path, null, null, null);
     }
 
+    public ChessGame getGameState(int gameID, String authToken) {
+        return new ChessGame();
+    }
+
+    public String getServerUrl() {
+        return serverUrl;
+    }
 
     // helper Methods
     private <T> T makeRequest(String method, String path, Object requestBody, Class<T> responseClass, String authToken)
@@ -127,9 +131,4 @@ public class ServerFacade {
     private boolean isSuccessful(int statusCode) {
         return statusCode >= 200 && statusCode < 300;
     }
-
-    public ChessGame getGameState(int gameID, String authToken) {
-        return new ChessGame();
-    }
-
 }
