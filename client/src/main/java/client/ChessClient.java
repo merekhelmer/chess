@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import model.GameData;
 import websocket.MessageHandler;
 import websocket.WebSocketFacade;
@@ -78,6 +79,64 @@ public class ChessClient {
                     game.blackUsername() != null ? game.blackUsername() : "Open"));
         }
         return sb.toString();
+    }
+
+    public String joinGame(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length >= 2) {
+            gameID = Integer.parseInt(params[0]);
+            var playerColor = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
+            server.joinGame(gameID, playerColor, authData.authToken());
+            connectWebSocket();
+            ws.sendConnectCommand(authData.authToken(), gameID);
+            return "Joined game as " + playerColor;
+        }
+        throw new ResponseException(400, "Usage: join <game_id> <WHITE|BLACK>");
+    }
+
+    public String observeGame(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length >= 1) {
+            gameID = Integer.parseInt(params[0]);
+            connectWebSocket();
+            ws.sendConnectCommand(authData.authToken(), gameID);
+            return "Observing game with ID: " + gameID;
+        }
+        throw new ResponseException(400, "Usage: observe <game_id>");
+    }
+
+    public String signOut() throws ResponseException {
+        assertSignedIn();
+        server.logout(authData.authToken());
+        ws.disconnect();
+        state = LoginState.SIGNEDOUT;
+        authData = null;
+        return "Successfully signed out.";
+    }
+
+    private void connectWebSocket() throws ResponseException {
+        if (ws == null || !ws.isConnected()) {
+            ws = new WebSocketFacade(server.getServerUrl(), messageHandler);
+        }
+    }
+
+    public String help() {
+        if (state == LoginState.SIGNEDOUT) {
+            return """
+                     Commands:
+                     - signin <username> <password>
+                     - quit
+                    """;
+        }
+        return """
+                Commands:
+                - create <game_name>
+                - list
+                - join <game_id> <WHITE|BLACK>
+                - observe <game_id>
+                - signout
+                - quit
+                """;
     }
 
     private void assertSignedIn() throws ResponseException {
