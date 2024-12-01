@@ -1,10 +1,10 @@
 package websocket;
 
+import chess.ChessMove;
 import client.ResponseException;
 import com.google.gson.Gson;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
-
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -13,12 +13,12 @@ import java.net.URISyntaxException;
 
 public class WebSocketFacade {
     private Session session;
-    private final MessageHandler notificationHandler;
+    private final MessageHandler messageHandler;
 
-    public WebSocketFacade(String serverUrl, MessageHandler notificationHandler) throws ResponseException {
+    public WebSocketFacade(String serverUrl, MessageHandler messageHandler) throws ResponseException {
         try {
             URI uri = new URI(serverUrl.replace("http", "ws") + "/ws");
-            this.notificationHandler = notificationHandler;
+            this.messageHandler = messageHandler;
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(new Endpoint() {
@@ -34,18 +34,34 @@ public class WebSocketFacade {
 
     private void onMessage(String message) {
         ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
-        notificationHandler.notify();
+        messageHandler.notify(serverMessage);
     }
 
     public void sendConnectCommand(String authToken, int gameID) throws ResponseException {
         sendCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
     }
 
-    public void sendCommand(UserGameCommand command) throws ResponseException {
+    public void sendMakeMoveCommand(ChessMove move, String authToken, int gameID) throws ResponseException {
+        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID);
+        command.setMove(move);
+        sendCommand(command);
+    }
+
+    public void sendResignCommand(String authToken, int gameID) throws ResponseException {
+        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
+        sendCommand(command);
+    }
+
+    public void sendLeaveCommand(String authToken, int gameID) throws ResponseException {
+        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
+        sendCommand(command);
+    }
+
+    private void sendCommand(UserGameCommand command) throws ResponseException {
         try {
             session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException e) {
-            throw new ResponseException(500, e.getMessage());
+            throw new ResponseException(500, "Failed to send WebSocket command: " + e.getMessage());
         }
     }
 
