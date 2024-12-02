@@ -1,6 +1,7 @@
 package service;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
@@ -62,6 +63,39 @@ public class GameService {
             throw new DataAccessException("Error: Invalid auth token.");
         }
         return gameDAO.listGames();
+    }
+
+    public ChessGame getGame(int gameID) throws DataAccessException {
+        GameData gameData = gameDAO.getGame(gameID);
+        if (gameData == null) {
+            throw new DataAccessException("Error: Game not found");
+        }
+        return gameData.game(); //ChessGame object
+    }
+
+    public void updateGame(int gameID, ChessGame updatedGame) throws DataAccessException {
+        GameData existingGame = gameDAO.getGame(gameID);
+        if (existingGame == null) {
+            throw new DataAccessException("Error: Game not found");
+        }
+        GameData updatedGameData = new GameData(
+                existingGame.gameID(),
+                existingGame.whiteUsername(),
+                existingGame.blackUsername(),
+                existingGame.gameName(),
+                updatedGame
+        );
+        gameDAO.updateGame(updatedGameData);
+    }
+
+    public void markGameAsResigned(int gameID) throws DataAccessException {
+        GameData gameData = gameDAO.getGame(gameID);
+        if (gameData == null) {
+            throw new DataAccessException("Error: Game not found");
+        }
+        ChessGame game = gameData.game();
+        game.setTeamTurn(null); //indicates game is over
+        updateGame(gameID, game);
     }
 
     public void clear() throws DataAccessException {
