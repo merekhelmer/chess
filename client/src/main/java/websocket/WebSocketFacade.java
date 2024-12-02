@@ -3,6 +3,7 @@ package websocket;
 import chess.ChessMove;
 import client.ResponseException;
 import com.google.gson.Gson;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -14,11 +15,13 @@ import java.net.URISyntaxException;
 public class WebSocketFacade {
     private Session session;
     private final MessageHandler messageHandler;
+    private final Gson gson;
 
     public WebSocketFacade(String serverUrl, MessageHandler messageHandler) throws ResponseException {
         try {
             URI uri = new URI(serverUrl.replace("http", "ws") + "/ws");
             this.messageHandler = messageHandler;
+            this.gson = new Gson();
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(new Endpoint() {
@@ -33,7 +36,7 @@ public class WebSocketFacade {
     }
 
     private void onMessage(String message) {
-        ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+        ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
         messageHandler.notify(serverMessage);
     }
 
@@ -41,9 +44,8 @@ public class WebSocketFacade {
         sendCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
     }
 
-    public void sendMakeMoveCommand(ChessMove move, String authToken, int gameID) throws ResponseException {
-        UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID);
-        command.setMove(move);
+    public void sendMakeMoveCommand(String authToken, int gameID, ChessMove move) throws ResponseException {
+        MakeMoveCommand command = new MakeMoveCommand(authToken, gameID, move);
         sendCommand(command);
     }
 
@@ -59,7 +61,8 @@ public class WebSocketFacade {
 
     private void sendCommand(UserGameCommand command) throws ResponseException {
         try {
-            session.getBasicRemote().sendText(new Gson().toJson(command));
+            String json = gson.toJson(command);
+            session.getBasicRemote().sendText(json);
         } catch (IOException e) {
             throw new ResponseException(500, "Failed to send WebSocket command: " + e.getMessage());
         }
