@@ -11,12 +11,10 @@ import java.util.Objects;
  * methods.
  */
 public class UserGameCommand {
-
     private final CommandType commandType;
-
     private final String authToken;
-
     private final Integer gameID;
+    private ChessMove move;
 
     public UserGameCommand(CommandType commandType, String authToken, Integer gameID) {
         this.commandType = commandType;
@@ -35,15 +33,16 @@ public class UserGameCommand {
         return commandType;
     }
 
-    public void setMove(ChessMove move) {
-    }
-
     public String getAuthToken() {
         return authToken;
     }
 
     public Integer getGameID() {
         return gameID;
+    }
+
+    public ChessMove getMove() {
+        return move;
     }
 
     @Override

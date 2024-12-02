@@ -65,6 +65,7 @@ public class Server {
     }
 
     public void stop() {
+        webSocketHandler.closeAllConnections();
         Spark.stop();
         Spark.awaitStop();
     }

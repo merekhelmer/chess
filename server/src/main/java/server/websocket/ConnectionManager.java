@@ -37,4 +37,7 @@ public class ConnectionManager {
             sessions.removeAll(toRemove);
         }
     }
+
+    public void closeAll() {
+    }
 }
