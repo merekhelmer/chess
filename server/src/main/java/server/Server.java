@@ -6,6 +6,7 @@ import service.UserService;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
+import server.websocket.WebSocketHandler;
 
 public class Server {
 
@@ -14,6 +15,7 @@ public class Server {
 
     private final UserHandler userHandler;
     private final GameHandler gameHandler;
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
         SQLUserDAO userDAO = new SQLUserDAO();
@@ -25,6 +27,7 @@ public class Server {
 
         this.userHandler = new UserHandler(userService);
         this.gameHandler = new GameHandler(gameService);
+        this.webSocketHandler = new WebSocketHandler(gameService);
     }
 
     public int run(int desiredPort) {
@@ -50,6 +53,9 @@ public class Server {
         Spark.get("/game", gameHandler::listGames);
         Spark.post("/game", gameHandler::createGame);
         Spark.put("/game", gameHandler::joinGame);
+
+        // Websocket Endpoint
+        Spark.webSocket("/ws", webSocketHandler);
 
         // Global exception handling
         Spark.exception(Exception.class, this::genericExceptionHandler);
