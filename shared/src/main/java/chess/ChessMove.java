@@ -18,7 +18,7 @@ public class ChessMove {
         this.promotionPiece = promotionPiece;
     }
 
-    private ChessMove parseMove(String input) throws InvalidMoveException {
+    public static ChessMove parseMove(String input) throws InvalidMoveException {
         String[] parts = input.split(" ");
         if (parts.length < 2 || parts.length > 3) {
             throw new InvalidMoveException("Invalid move format. Use: <start> <end> [promotion]");
@@ -31,7 +31,7 @@ public class ChessMove {
         return new ChessMove(start, end, promotionPiece);
     }
 
-    private ChessPiece.PieceType parsePromotionPiece(String input) throws InvalidMoveException {
+    public static ChessPiece.PieceType parsePromotionPiece(String input) throws InvalidMoveException {
         return switch (input.toUpperCase()) {
             case "Q" -> ChessPiece.PieceType.QUEEN;
             case "R" -> ChessPiece.PieceType.ROOK;

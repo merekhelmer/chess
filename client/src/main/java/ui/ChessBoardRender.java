@@ -12,7 +12,10 @@ public class ChessBoardRender {
         this.chessGame = chessGame;
     }
 
-
+    public ChessGame getChessGame() {
+        return chessGame;
+    }
+    
     public void renderBoard(boolean whiteAtBottom, ChessPosition selectedPos) {
         // clear the terminal screen
         System.out.print(EscapeSequences.ERASE_SCREEN);
