@@ -1,7 +1,6 @@
 package service;
 
 import chess.ChessGame;
-import chess.ChessMove;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;

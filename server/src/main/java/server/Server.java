@@ -73,7 +73,6 @@ public class Server {
     private Object clearDB(Request req, Response resp) throws DataAccessException {
         gameService.clear();   // clear games first to remove dependencies
         userService.clear();
-
         resp.status(200);
         return "{}";
     }
