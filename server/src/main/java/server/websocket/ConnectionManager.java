@@ -1,6 +1,5 @@
 package server.websocket;
 
-import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
 
@@ -8,36 +7,48 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 public class ConnectionManager {
-    private final ConcurrentHashMap<Integer, ArrayList<Session>> gameConnections = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
-    public void add(Session session, int gameId) {
-        gameConnections.computeIfAbsent(gameId, k -> new ArrayList<>()).add(session);
+    public void add(Session session, int gameID) {
+        String sessionId = Integer.toString(session.hashCode()); // generate unique session ID
+        connections.put(sessionId, new Connection(sessionId, session, gameID));
     }
 
     public void remove(Session session) {
-        gameConnections.values().forEach(sessions -> sessions.remove(session));
+        String sessionId = Integer.toString(session.hashCode()); // retrieve session ID
+        connections.remove(sessionId);
     }
 
     public void broadcast(int gameID, ServerMessage message) throws IOException {
-        ArrayList<Session> sessions = gameConnections.get(gameID);
-        if (sessions != null) {
+        var removeList = new ArrayList<String>();
 
-            String jsonMessage = new Gson().toJson(message);
-            ArrayList<Session> toRemove = new ArrayList<>();
+        for (var entry : connections.entrySet()) {
+            Connection connection = entry.getValue();
 
-            for (Session session : sessions) {
-                if (session.isOpen()) {
-                    session.getRemote().sendString(jsonMessage);
-                } else {
-                    toRemove.add(session);
+            if (connection.getGameID() == gameID) {
+                try {
+                    connection.send(message);
+                } catch (IOException e) {
+                    removeList.add(entry.getKey());
                 }
             }
-            sessions.removeAll(toRemove);
+        }
+
+        // remove closed connections
+        for (String sessionId : removeList) {
+            connections.remove(sessionId);
         }
     }
 
     public void closeAll() {
+        for (var connection : connections.values()) {
+            try {
+                connection.close();
+            } catch (IOException e) {
+                System.err.println("Failed to close connection: " + e.getMessage());
+            }
+        }
+        connections.clear();
     }
 }
