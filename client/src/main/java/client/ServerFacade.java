@@ -63,9 +63,6 @@ public class ServerFacade {
         makeRequest("DELETE", path, null, null, null);
     }
 
-    public ChessGame getGameState(int gameID, String authToken) {
-        return new ChessGame();
-    }
 
     public String getServerUrl() {
         return serverUrl;
