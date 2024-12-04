@@ -37,8 +37,6 @@ public class Main {
                 }
             }
 
-            // ask user if they want to quit after every cycle
-            System.out.println("Do you want to quit? Type 'yes' to exit or press Enter to continue:");
             String input = scanner.nextLine().trim().toLowerCase();
             if (input.equals("yes")) {
                 running = false;

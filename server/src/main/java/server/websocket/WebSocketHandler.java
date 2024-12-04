@@ -46,14 +46,16 @@ public class WebSocketHandler {
     }
 
     private void handleConnect(Session session, UserGameCommand command) throws IOException {
-        connections.add(session, command.getGameID());
-
         try {
             ChessGame game = gameService.getGame(command.getGameID());
+            connections.add(session, command.getGameID());
+
+            // LOAD_GAME only to the root client
             sendLoadGame(session, game);
 
-            String notification = command.getAuthToken() + " connected to the game.";
-            connections.broadcast(command.getGameID(), new NotificationMessage(notification));
+            // notify all other clients in the game
+            String notificationMessage = command.getAuthToken() + " connected to the game.";
+            connections.broadcastExclude(command.getGameID(), session, new NotificationMessage(notificationMessage));
         } catch (Exception e) {
             sendError(session, "Failed to connect: " + e.getMessage());
         }
@@ -69,7 +71,7 @@ public class WebSocketHandler {
 
         try {
             ChessGame game = gameService.getGame(moveCommand.getGameID());
-            ChessMove move = moveCommand.getMove(); // Now resolves correctly
+            ChessMove move = moveCommand.getMove();
 
             game.makeMove(move);
             gameService.updateGame(moveCommand.getGameID(), game);

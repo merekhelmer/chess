@@ -10,13 +10,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
     private final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
+
     public void add(Session session, int gameID) {
-        String sessionId = Integer.toString(session.hashCode()); // generate unique session ID
+        String sessionId = Integer.toString(session.hashCode());
         connections.put(sessionId, new Connection(sessionId, session, gameID));
     }
 
     public void remove(Session session) {
-        String sessionId = Integer.toString(session.hashCode()); // retrieve session ID
+        String sessionId = Integer.toString(session.hashCode());
         connections.remove(sessionId);
     }
 
@@ -25,7 +26,6 @@ public class ConnectionManager {
 
         for (var entry : connections.entrySet()) {
             Connection connection = entry.getValue();
-
             if (connection.getGameID() == gameID) {
                 try {
                     connection.send(message);
@@ -34,7 +34,25 @@ public class ConnectionManager {
                 }
             }
         }
+        // remove closed connections
+        for (String sessionId : removeList) {
+            connections.remove(sessionId);
+        }
+    }
 
+    public void broadcastExclude(int gameID, Session excludeSession, ServerMessage message) throws IOException {
+        var removeList = new ArrayList<String>();
+
+        for (var entry : connections.entrySet()) {
+            Connection connection = entry.getValue();
+            if (connection.getGameID() == gameID && !connection.getSession().equals(excludeSession)) {
+                try {
+                    connection.send(message);
+                } catch (IOException e) {
+                    removeList.add(entry.getKey());
+                }
+            }
+        }
         // remove closed connections
         for (String sessionId : removeList) {
             connections.remove(sessionId);
@@ -52,3 +70,4 @@ public class ConnectionManager {
         connections.clear();
     }
 }
+

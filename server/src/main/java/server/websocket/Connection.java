@@ -30,4 +30,8 @@ public class Connection {
     public int getGameID() {
         return gameID;
     }
+
+    public Object getSession() {
+        return session;
+    }
 }

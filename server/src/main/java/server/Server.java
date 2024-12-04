@@ -43,6 +43,7 @@ public class Server {
         Spark.port(desiredPort);
 
         // Serve static files from the /web directory
+        Spark.webSocket("/ws", webSocketHandler);
         Spark.staticFiles.location("/web");
 
         Spark.delete("/db", this::clearDB);
@@ -53,9 +54,6 @@ public class Server {
         Spark.get("/game", gameHandler::listGames);
         Spark.post("/game", gameHandler::createGame);
         Spark.put("/game", gameHandler::joinGame);
-
-        // Websocket Endpoint
-        Spark.webSocket("/ws", webSocketHandler);
 
         // Global exception handling
         Spark.exception(Exception.class, this::genericExceptionHandler);

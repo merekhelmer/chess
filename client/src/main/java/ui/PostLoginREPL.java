@@ -116,7 +116,7 @@ public class PostLoginREPL {
 
     private void playGame() {
         if (listedGames == null || listedGames.isEmpty()) {
-            System.out.println("No games available to join. Please list games first.");
+            System.out.println("No games available to join.");
             return;
         }
         System.out.print("Enter which game you want to join: ");

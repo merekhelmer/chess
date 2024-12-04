@@ -308,7 +308,7 @@ public class ChessGame {
         }
         return null;
     }
-
+    
     /**
      * Enum identifying the 2 possible teams in a chess game
      */
