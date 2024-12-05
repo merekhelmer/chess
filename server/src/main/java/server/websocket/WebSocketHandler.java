@@ -4,6 +4,7 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -94,7 +95,7 @@ public class WebSocketHandler {
                 return;
             }
             if (!game.isPlayerTurn(username, whitePlayer, blackPlayer)) {
-                sendError(session, "It's not your turn.");
+                sendError(session, "It's not your turn or opponent has left the game.");
                 return;
             }
 
@@ -107,14 +108,21 @@ public class WebSocketHandler {
             String notificationMessage = username + " made the move: " + move;
             connections.broadcastExclude(moveCommand.getGameID(), session, new NotificationMessage(notificationMessage));
 
+            // checkmate
             if (game.isInCheckmate(game.getTeamTurn())) {
-                connections.broadcast(moveCommand.getGameID(), new NotificationMessage("Checkmate!"));
+                String playerInCheckmate = getPlayerNameByTeam(moveCommand.getGameID(), game.getTeamTurn());
+                connections.broadcast(moveCommand.getGameID(), new NotificationMessage(playerInCheckmate + " is in checkmate!"));
                 gameService.markGameAsResigned(moveCommand.getGameID()); // mark the game as over
-                return; // no further messages should be sent
+                return;
             }
+
+            // check
             if (game.isInCheck(game.getTeamTurn())) {
-                connections.broadcast(moveCommand.getGameID(), new NotificationMessage("Check!"));
+                String playerInCheck = getPlayerNameByTeam(moveCommand.getGameID(), game.getTeamTurn());
+                connections.broadcast(moveCommand.getGameID(), new NotificationMessage(playerInCheck + " is in check!"));
             }
+
+            // stalemate
             if (game.isInStalemate(game.getTeamTurn())) {
                 connections.broadcast(moveCommand.getGameID(), new NotificationMessage("Stalemate!"));
                 gameService.markGameAsResigned(moveCommand.getGameID());
@@ -161,7 +169,7 @@ public class WebSocketHandler {
                 return;
             }
 
-            // Ensure only players can resign
+            // only players can resign
             String whitePlayer = gameService.getWhitePlayer(command.getGameID());
             String blackPlayer = gameService.getBlackPlayer(command.getGameID());
             if (!username.equals(whitePlayer) && !username.equals(blackPlayer)) {
@@ -169,7 +177,7 @@ public class WebSocketHandler {
                 return;
             }
 
-            gameService.markGameAsResigned(command.getGameID()); // Mark the game as over
+            gameService.markGameAsResigned(command.getGameID());
             String notificationMessage = username + " resigned.";
             connections.broadcast(command.getGameID(), new NotificationMessage(notificationMessage));
         } catch (Exception e) {
@@ -184,8 +192,18 @@ public class WebSocketHandler {
     }
 
     private void sendError(Session session, String errorMessage) throws IOException {
-        ErrorMessage errorMessageObject = new ErrorMessage(errorMessage);
+        ErrorMessage errorMessageObject = new ErrorMessage("Error: " + errorMessage);
         session.getRemote().sendString(gson.toJson(errorMessageObject));
+    }
+
+    private String getPlayerNameByTeam(int gameID, ChessGame.TeamColor teamColor) throws DataAccessException {
+        String playerName;
+        if (teamColor == ChessGame.TeamColor.WHITE) {
+            playerName = gameService.getWhitePlayer(gameID);
+        } else {
+            playerName = gameService.getBlackPlayer(gameID);
+        }
+        return playerName != null ? playerName : (teamColor == ChessGame.TeamColor.WHITE ? "White player" : "Black player");
     }
 
     public void closeAllConnections() {

@@ -5,18 +5,20 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
+import java.util.Set;
+
 public class ChessBoardRender {
-    private final ChessGame chessGame;
+    private ChessGame chessGame;
 
     public ChessBoardRender(ChessGame chessGame) {
         this.chessGame = chessGame;
     }
 
-    public ChessGame getChessGame() {
-        return chessGame;
+    public void setChessGame(ChessGame chessGame) {
+        this.chessGame = chessGame;
     }
-    
-    public void renderBoard(boolean whiteAtBottom, ChessPosition selectedPos) {
+
+    public void renderBoard(boolean whiteAtBottom, Set<ChessPosition> highlightedPositions) {
         // clear the terminal screen
         System.out.print(EscapeSequences.ERASE_SCREEN);
         System.out.flush();
@@ -31,11 +33,8 @@ public class ChessBoardRender {
 
         // print each row of the board
         for (int row = 8; row >= 1; row--) {
-            if (whiteAtBottom) {
-                renderRow(row, whiteAtBottom, board);
-            } else {
-                renderRow(9 - row, whiteAtBottom, board);
-            }
+            int actualRow = whiteAtBottom ? row : 9 - row;
+            renderRow(actualRow, whiteAtBottom, board, highlightedPositions);
         }
 
         printColumnLabels(whiteAtBottom);
@@ -45,7 +44,7 @@ public class ChessBoardRender {
         System.out.print(EscapeSequences.RESET_BG_COLOR);
     }
 
-    private void renderRow(int rowNumber, boolean whiteAtBottom, ChessBoard board) {
+    private void renderRow(int rowNumber, boolean whiteAtBottom, ChessBoard board, Set<ChessPosition> highlightedPositions) {
         // print row number at the start
         System.out.print(" " + rowNumber + " ");
 
@@ -56,23 +55,26 @@ public class ChessBoardRender {
 
             // determine if the square is light or dark
             boolean isLightSquare = (rowNumber + actualCol) % 2 != 0;
-            if (isLightSquare) {
-                System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+
+            // highlighting logic
+            if (highlightedPositions != null && highlightedPositions.contains(position)) {
+                System.out.print(EscapeSequences.SET_BG_COLOR_YELLOW);
+            } else if (isLightSquare) {
+                System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_SQUARE);
             } else {
-                System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                System.out.print(EscapeSequences.SET_BG_COLOR_DARK_SQUARE);
             }
 
             // piece with appropriate coloring
             if (piece != null) {
                 if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                     System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE);
-                    System.out.print(getPieceSymbol(piece));
                 } else {
                     System.out.print(EscapeSequences.SET_TEXT_COLOR_BLACK);
-                    System.out.print(getPieceSymbol(piece));
                 }
+                System.out.print(getPieceSymbol(piece));
             } else {
-                System.out.print(EscapeSequences.EMPTY);
+                System.out.print("   ");
             }
 
             System.out.print(EscapeSequences.RESET_TEXT_COLOR);
@@ -81,7 +83,6 @@ public class ChessBoardRender {
 
         System.out.println(" " + rowNumber);
     }
-
 
     private void printColumnLabels(boolean whiteAtBottom) {
         System.out.print("   "); // spacing for row numbers

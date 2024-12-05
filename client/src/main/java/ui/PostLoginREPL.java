@@ -1,14 +1,10 @@
 package ui;
 
 import chess.ChessGame;
-import chess.InvalidMoveException;
 import client.ResponseException;
 import client.ServerFacade;
 import model.AuthData;
 import model.GameData;
-import websocket.WebSocketFacade;
-import websocket.messages.ErrorMessage;
-import websocket.messages.NotificationMessage;
 
 import java.util.List;
 import java.util.Scanner;
@@ -33,26 +29,13 @@ public class PostLoginREPL {
             String command = scanner.nextLine().trim().toLowerCase();
 
             switch (command) {
-                case "help":
-                    displayHelp();
-                    break;
-                case "logout":
-                    loggedIn = !logout();
-                    break;
-                case "create game":
-                    createGame();
-                    break;
-                case "list games":
-                    listGames();
-                    break;
-                case "play game":
-                    playGame();
-                    break;
-                case "observe game":
-                    observeGame();
-                    break;
-                default:
-                    System.out.println("Unknown command.");
+                case "help" -> displayHelp();
+                case "logout" -> loggedIn = !logout();
+                case "create game" -> createGame();
+                case "list games" -> listGames();
+                case "play game" -> playGame();
+                case "observe game" -> observeGame();
+                default -> System.out.println("Unknown command.");
             }
         }
         return true; // return true if logged out
@@ -113,7 +96,6 @@ public class PostLoginREPL {
         }
     }
 
-
     private void playGame() {
         if (listedGames == null || listedGames.isEmpty()) {
             System.out.println("No games available to join.");
@@ -144,13 +126,8 @@ public class PostLoginREPL {
             serverFacade.joinGame(selectedGame.gameID(), playerColor, authData.authToken());
             System.out.println("Successfully joined the game.");
 
-            //websocket connection
-            WebSocketFacade webSocketFacade = new WebSocketFacade(serverFacade.getServerUrl(),
-                    this::handleServerMessage);
-            webSocketFacade.sendConnectCommand(authData.authToken(), selectedGame.gameID());
-
-            //transition to GamePlayREPL
-            GamePlayREPL gameplayREPL = new GamePlayREPL(webSocketFacade, scanner, playerColor,
+            // Transition to GamePlayREPL
+            GamePlayREPL gameplayREPL = new GamePlayREPL(serverFacade.getServerUrl(), scanner, playerColor,
                     authData, selectedGame.gameID());
             gameplayREPL.start();
 
@@ -158,8 +135,6 @@ public class PostLoginREPL {
             System.out.println("Invalid input. Please enter a valid game number.");
         } catch (ResponseException e) {
             System.out.println("Failed to join game: " + e.getMessage());
-        } catch (InvalidMoveException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -180,32 +155,17 @@ public class PostLoginREPL {
 
             GameData selectedGame = listedGames.get(gameNumber - 1);
 
-            WebSocketFacade webSocketFacade = new WebSocketFacade(serverFacade.getServerUrl(),
-                    this::handleServerMessage); // Replace with your actual callback method
-
-            webSocketFacade.sendConnectCommand(authData.authToken(), selectedGame.gameID());
-
-            // transition to GamePlayREPL
-            GamePlayREPL gamePlayREPL = new GamePlayREPL(webSocketFacade, scanner, null, authData, selectedGame.gameID());
+            // transition to GamePlayREPL as an observer (playerColor is null)
+            GamePlayREPL gamePlayREPL = new GamePlayREPL(serverFacade.getServerUrl(), scanner, null,
+                    authData, selectedGame.gameID());
             gamePlayREPL.start();
 
         } catch (NumberFormatException e) {
             System.out.println("Invalid input. Please enter a valid game number.");
         } catch (ResponseException e) {
             System.out.println("Failed to observe game: " + e.getMessage());
-        } catch (InvalidMoveException e) {
-            throw new RuntimeException(e);
         }
     }
-
-    private void handleServerMessage(websocket.messages.ServerMessage message) {
-        switch (message.getServerMessageType()) {
-            case LOAD_GAME -> System.out.println("Game updated. Redrawing the board.");
-            case ERROR -> System.out.println("Error: " + ((ErrorMessage) message).getErrorMessage());
-            case NOTIFICATION -> System.out.println("Notification: " + ((NotificationMessage) message).getMessage());
-            default -> System.out.println("Unknown message type received.");
-        }
-    }
-
 }
+
 

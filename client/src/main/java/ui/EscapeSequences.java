@@ -23,6 +23,9 @@ public class EscapeSequences {
 
     private static final String SET_TEXT_COLOR = UNICODE_ESCAPE + "[38;5;";
     private static final String SET_BG_COLOR = UNICODE_ESCAPE + "[48;5;";
+    public static final String SET_BG_COLOR_LIGHT_SQUARE = SET_BG_COLOR + "180m"; // Light brown
+    public static final String SET_BG_COLOR_DARK_SQUARE = SET_BG_COLOR + "94m";   // Dark brown
+
 
     public static final String SET_TEXT_COLOR_BLACK = SET_TEXT_COLOR + "0m";
     public static final String SET_TEXT_COLOR_LIGHT_GREY = SET_TEXT_COLOR + "242m";

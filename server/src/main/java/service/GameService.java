@@ -29,10 +29,10 @@ public class GameService {
             throw new DataAccessException("Error: Game not found");
         }
 
-        // check if the requested color is available
-        if (playerColor == ChessGame.TeamColor.WHITE && game.whiteUsername() == null) {
+        // joining if the color is open
+        if (playerColor == ChessGame.TeamColor.WHITE && (game.whiteUsername() == null || game.whiteUsername().isEmpty())) {
             game = new GameData(game.gameID(), authData.username(), game.blackUsername(), game.gameName(), game.game());
-        } else if (playerColor == ChessGame.TeamColor.BLACK && game.blackUsername() == null) {
+        } else if (playerColor == ChessGame.TeamColor.BLACK && (game.blackUsername() == null || game.blackUsername().isEmpty())) {
             game = new GameData(game.gameID(), game.whiteUsername(), authData.username(), game.gameName(), game.game());
         } else {
             throw new DataAccessException("Error: Requested team color is already taken");
@@ -93,12 +93,55 @@ public class GameService {
             throw new DataAccessException("Error: Game not found");
         }
         ChessGame game = gameData.game();
-        game.setTeamTurn(null); //indicates game is over
+        game.setOver(true); // Use a boolean flag to indicate the game is over
         updateGame(gameID, game);
     }
 
     public void clear() throws DataAccessException {
         gameDAO.clear();
+    }
+
+    public String getWhitePlayer(int gameID) throws DataAccessException {
+        GameData game = gameDAO.getGame(gameID);
+        if (game == null) {
+            throw new DataAccessException("Error: Game not found");
+        }
+        return game.whiteUsername();
+    }
+
+    public String getBlackPlayer(int gameID) throws DataAccessException {
+        GameData game = gameDAO.getGame(gameID);
+        if (game == null) {
+            throw new DataAccessException("Error: Game not found");
+        }
+        return game.blackUsername();
+    }
+
+    public String getUsernameFromAuthToken(String authToken) throws DataAccessException {
+        AuthData authData = authDAO.getAuth(authToken);
+        if (authData == null) {
+            throw new DataAccessException("Invalid authToken.");
+        }
+        return authData.username();
+    }
+
+    public void removePlayerFromGame(int gameID, String username) throws DataAccessException {
+        GameData game = gameDAO.getGame(gameID);
+        if (game == null) {
+            throw new DataAccessException("Error: Game not found");
+        }
+
+        // clear the player's slot
+        String whitePlayer = game.whiteUsername();
+        String blackPlayer = game.blackUsername();
+
+        if (username.equals(whitePlayer)) {
+            game = new GameData(game.gameID(), null, blackPlayer, game.gameName(), game.game());
+        } else if (username.equals(blackPlayer)) {
+            game = new GameData(game.gameID(), whitePlayer, null, game.gameName(), game.game());
+        }
+
+        gameDAO.updateGame(game);
     }
 }
 
