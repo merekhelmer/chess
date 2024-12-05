@@ -1,7 +1,5 @@
 package websocket.commands;
 
-import chess.ChessMove;
-
 import java.util.Objects;
 
 /**
@@ -46,10 +44,9 @@ public class UserGameCommand {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof UserGameCommand)) {
+        if (!(o instanceof UserGameCommand that)) {
             return false;
         }
-        UserGameCommand that = (UserGameCommand) o;
         return getCommandType() == that.getCommandType() &&
                 Objects.equals(getAuthToken(), that.getAuthToken()) &&
                 Objects.equals(getGameID(), that.getGameID());

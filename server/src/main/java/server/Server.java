@@ -1,12 +1,12 @@
 package server;
 
 import dataaccess.*;
+import server.websocket.WebSocketHandler;
 import service.GameService;
 import service.UserService;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
-import server.websocket.WebSocketHandler;
 
 public class Server {
 

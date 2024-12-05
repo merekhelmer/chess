@@ -12,7 +12,7 @@ import java.net.URI;
 
 public class WebSocketFacade {
 
-    private Session session;
+    private final Session session;
     private final MessageHandler messageHandler;
 
     public WebSocketFacade(String serverUrl, MessageHandler messageHandler) throws ResponseException {

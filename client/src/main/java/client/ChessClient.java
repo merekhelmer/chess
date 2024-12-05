@@ -1,6 +1,5 @@
 package client;
 
-import client.ServerFacade;
 import model.AuthData;
 import ui.LoginState;
 import ui.PostLoginREPL;

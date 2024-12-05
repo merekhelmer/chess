@@ -1,15 +1,23 @@
 package ui;
 
-import chess.*;
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import client.ResponseException;
+import com.google.gson.Gson;
 import model.AuthData;
 import websocket.MessageHandler;
 import websocket.WebSocketFacade;
-import websocket.messages.*;
-import com.google.gson.Gson;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
+import java.util.Collection;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.*;
 
 public class GamePlayREPL implements MessageHandler {
 
